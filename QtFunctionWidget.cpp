@@ -3,6 +3,7 @@
 #include <QFile>
 #include <cmath>
 #include "util.h"
+#include <qlist.h>
 
 QtFunctionWidget::QtFunctionWidget(QWidget *parent) : QOpenGLWidget (parent)
 		,hasSetRect(false), scale(0.8), hasWaH(false),currentLayer(NULL)
@@ -19,17 +20,13 @@ QtFunctionWidget::~QtFunctionWidget(){
 	for(int i = 0; i < map->size();i++){
 		GeoLayer* layer = map->getLayerAt(i);
 		for(int j = 0; j < layer->size();j++){
-			QOpenGLVertexArrayObject* vao = featureVaosMap[layer->getFeatureAt(j)];
-			vao->destroy();
-			delete vao;
-		}
-	}
-	for(int i = 0; i < map->size();i++){
-		GeoLayer* layer = map->getLayerAt(i);
-		for(int j = 0; j < layer->size();j++){
-			QOpenGLBuffer* vbo = featureVbosMap[layer->getFeatureAt(j)];
-			vbo->destroy();
-			delete vbo;
+			QList<QOpenGLVertexArrayObject*>* list = featureVaosMap[layer->getFeatureAt(j)];
+			for (int i = 0; i < list->size(); i++) {
+				QOpenGLVertexArrayObject* vao = list->at(i);
+				vao->destroy();
+				delete vao;
+			}
+			delete list;
 		}
 	}
 	
@@ -101,8 +98,18 @@ void QtFunctionWidget::paintGL(){
 			GeoLayer* layer = map->getLayerAt(j);
 			if(layer->isVisable()){
 				for(int i = 0; i < layer->size();i++){
-					 QOpenGLVertexArrayObject::Binder vaoBind(featureVaosMap[layer->getFeatureAt(i)]);
-					 glDrawArrays(GL_LINE_LOOP,0,layer->getFeatureAt(i)->getGeometry()->size());
+					GeoFeature* feature = layer->getFeatureAt(i);
+					QList<QOpenGLVertexArrayObject*>* vaos = featureVaosMap[feature];
+					for (int j = 0; j < vaos->size(); j++) {
+						QOpenGLVertexArrayObject* vao = vaos->at(j);
+						QOpenGLVertexArrayObject::Binder vaoBind(vao);
+						if (vao->property("type").toInt() == EnumType::bufferType::VBO) {
+							glDrawArrays(GL_LINE_LOOP, 0, layer->getFeatureAt(i)->getGeometry()->size());
+						}
+						else if (vao->property("type").toInt() == EnumType::bufferType::EBO) {
+							glDrawElements(GL_TRIANGLES, vao->property("indexNum").toInt(), GL_UNSIGNED_INT, 0);
+						}
+					}
 				}
 			}
 		}
@@ -240,7 +247,7 @@ void QtFunctionWidget::loadWaitLayers()
 void QtFunctionWidget::bindVao()
 {
 	for(int i = 0;i < tempProcessLayer->size();i++){
-		GeoFeature* feature = tempProcessLayer->getFeatureAt(i);
+		/*GeoFeature* feature = tempProcessLayer->getFeatureAt(i);
 		GeoGeometry* geometry = feature->getGeometry();
 		//开辟空间并保存记录
 		GLfloat* vertices = (GLfloat*)malloc(sizeof(vertices)*(geometry->size())*3);
@@ -272,33 +279,237 @@ void QtFunctionWidget::bindVao()
 				vertices[j*3+2] = GLfloat(0.0);
 			}
 		}
+		else {
+			qWarning() << "map class not set";
+		}*/
+
+		GeoFeature* feature = tempProcessLayer->getFeatureAt(i);
+		GeoGeometry* geometry = feature->getGeometry();
+		//开辟空间并保存记录
+		int size = 6;
+		if (geometry->getType() == EnumType::POINT) {
+			GLfloat* vertices = (GLfloat*)malloc(sizeof(GLfloat)*(geometry->size()) * size);
+			MarkerSymbol* markerSymbol = tempProcessLayer->getRender()->getMarkerSymbol();
+			QColor color = markerSymbol->getColor();
+			GeoPoint* point = (GeoPoint*)geometry;
+			float x = point->getXf();
+			float y = point->getYf();
+			vertices[0] = GLfloat(x);
+			vertices[1] = GLfloat(y);
+			vertices[2] = GLfloat(0.0);
+			vertices[3] = color.red();
+			vertices[4] = color.green();
+			vertices[5] = color.blue();
+
+			QList<QOpenGLVertexArrayObject*>* vaoList = new QList<QOpenGLVertexArrayObject*>();
+			QOpenGLVertexArrayObject* vao = new QOpenGLVertexArrayObject();
+			vaoList->push_back(vao);
+			vao->setProperty("type", QVariant(EnumType::bufferType::VBO));
+			featureVaosMap.insert(feature, vaoList);
+			
+			QOpenGLVertexArrayObject::Binder vaoBind0(vao);
+			QOpenGLBuffer* vbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+			vbo->create();
+			vbo->bind();
+			vbo->allocate(vertices, sizeof(GLfloat)*(geometry->size())*size);
 
 
-		QOpenGLVertexArrayObject* vao = new QOpenGLVertexArrayObject();
-		featureVaosMap.insert(feature,vao);
-		QOpenGLVertexArrayObject::Binder vaoBind(vao);
+			int posAttr = -1;
+			int colAttr = -1;
+			//通过属性名从顶点着色器中获取到相应的属性location
+			posAttr = shaderProgram.attributeLocation("aPos");
+			colAttr = shaderProgram.attributeLocation("aColor");
 
-	
-		QOpenGLBuffer* vbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-		featureVbosMap.insert(feature,vbo);
-		vbo->create();
-		vbo->bind();
-		vbo->allocate(vertices, sizeof(vertices)*(geometry->size())*3);
+			shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * size);
+			shaderProgram.setAttributeBuffer(colAttr, GL_FLOAT, sizeof(GLfloat) * 3, 3, sizeof(GLfloat) * size);
 
-		int posAttr = -1;
-		//int colAttr = -1;
-		//通过属性名从顶点着色器中获取到相应的属性location
-		posAttr = shaderProgram.attributeLocation("aPos");
-		//colAttr = shaderProgram.attributeLocation("aColor");
-	
-		shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * 3);
-		//shaderProgram.setAttributeBuffer(colAttr, GL_FLOAT, sizeof(GLfloat) * 3, 3, sizeof(GLfloat) * 6);
-	
-		shaderProgram.enableAttributeArray(posAttr);
-	   // shaderProgram.enableAttributeArray(colAttr);
-	
-		shaderProgram.release();
-		vbo->release();
+			shaderProgram.enableAttributeArray(posAttr);
+			shaderProgram.enableAttributeArray(colAttr);
+
+			shaderProgram.release();
+
+			vbo->release();
+		}
+		else if (geometry->getType() == EnumType::POLYLINE) {
+			GLfloat* vertices = (GLfloat*)malloc(sizeof(GLfloat)*(geometry->size()) * size);
+			GeoPolyline* polyline = (GeoPolyline*)geometry;
+			LineSymbol* lineSymbol = tempProcessLayer->getRender()->getLineSymbol();
+			QColor color = lineSymbol->getColor();
+			for (int j = 0; j < geometry->size(); j++) {
+				GeoPoint* point = polyline->getPointAt(j);
+				float x = point->getXf();
+				float y = point->getYf();
+				vertices[j * size + 0] = GLfloat(x);
+				vertices[j * size + 1] = GLfloat(y);
+				vertices[j * size + 2] = GLfloat(0.0);
+				vertices[j * size + 3] = color.red();
+				vertices[j * size + 4] = color.green();
+				vertices[j * size + 5] = color.blue();
+			}
+
+			QList<QOpenGLVertexArrayObject*>* vaoList = new QList<QOpenGLVertexArrayObject*>();
+			QOpenGLVertexArrayObject* vao = new QOpenGLVertexArrayObject();
+			vaoList->push_back(vao);
+			vao->setProperty("type", QVariant(EnumType::bufferType::VBO));
+			featureVaosMap.insert(feature, vaoList);
+
+			QOpenGLVertexArrayObject::Binder vaoBind0(vao);
+			QOpenGLBuffer* vbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+			vbo->create();
+			vbo->bind();
+			vbo->allocate(vertices, sizeof(GLfloat)*(geometry->size())*size);
+
+			int posAttr = -1;
+			int colAttr = -1;
+			//通过属性名从顶点着色器中获取到相应的属性location
+			posAttr = shaderProgram.attributeLocation("aPos");
+			colAttr = shaderProgram.attributeLocation("aColor");
+
+			shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * size);
+			shaderProgram.setAttributeBuffer(colAttr, GL_FLOAT, sizeof(GLfloat) * 3, 3, sizeof(GLfloat) * size);
+
+			shaderProgram.enableAttributeArray(posAttr);
+			shaderProgram.enableAttributeArray(colAttr);
+
+			shaderProgram.release();
+
+			vbo->release();
+		}
+		else if (geometry->getType() == EnumType::POLYGON) {
+			//公用部分
+			QList<QOpenGLVertexArrayObject*>* vaoList = new QList<QOpenGLVertexArrayObject*>();
+			featureVaosMap.insert(feature, vaoList);
+			GeoPolygon* polygon = (GeoPolygon*)geometry;
+			GLfloat* vertices = NULL;
+
+			//剖分三角
+			FillSymbol* fillSymbol = tempProcessLayer->getRender()->getFillSymbol();
+			QColor fillColor = fillSymbol->getColor();
+
+			//三角剖分数据 - level0
+			gpc_tristrip tristrip;
+			util::tesselation(polygon, &tristrip); 
+
+			int stripNum = tristrip.num_strips;		//三角分组数
+			int triNum = 0;		//三角个数
+			int vertexNum = 0;		//顶点个数，没有重复顶点
+			for (int i = 0; i < stripNum; i++)
+			{
+				triNum += tristrip.strip[i].num_vertices - 2;//计算一共有多少三角形
+				vertexNum += tristrip.strip[i].num_vertices;//计算一共有多少顶点
+			}
+
+			//创建顶点数组
+			vertices = new GLfloat[size * vertexNum];
+			int idx = 0;
+			for (int i = 0; i < stripNum; i++) {  //i为每个三角形组
+				gpc_vertex_list list = tristrip.strip[i];
+				for (int j = 0; j < list.num_vertices; j++) {  //j为三角形组中的每个顶点
+					gpc_vertex vertex = list.vertex[j];
+					float x = vertex.x;
+					float y = vertex.y;
+					vertices[idx * size + 0] = GLfloat(x);
+					vertices[idx * size + 1] = GLfloat(y);
+					vertices[idx * size + 2] = GLfloat(0.0);
+					vertices[idx * size + 3] = fillColor.red();
+					vertices[idx * size + 4] = fillColor.green();
+					vertices[idx * size + 5] = fillColor.blue();
+					idx++;
+				}
+			}
+
+			//创建索引数组
+			unsigned int *indices = new unsigned int[triNum * 3];
+			int idx1 = 0;
+			int cumulatedVertex = 0;
+			for (int i = 0; i < stripNum; i++) {//i为每个三角形组
+				gpc_vertex_list list = tristrip.strip[i];
+				for (int j = 0; j < list.num_vertices - 2; j++) {//j为三角形组中的每个三角形
+					for (int k = 0; k < 3; k++) {//k为0-3,代表每个三角形三个顶点的索引
+						indices[idx1++] = cumulatedVertex + j + k ;
+					}
+				}
+				cumulatedVertex += list.num_vertices;
+			}
+
+			QOpenGLVertexArrayObject* fillVao = new QOpenGLVertexArrayObject();
+			vaoList->push_back(fillVao);
+			fillVao->setProperty("type", QVariant(EnumType::bufferType::EBO));
+			fillVao->setProperty("indexNum",triNum * 3);
+			QOpenGLVertexArrayObject::Binder vaoBind0(fillVao);
+			QOpenGLBuffer* fillVbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+			fillVbo->create();
+			fillVbo->bind();
+			fillVbo->allocate(vertices, sizeof(GLfloat) * size * vertexNum);
+
+			QOpenGLBuffer* fillEbo = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+			fillEbo->create();
+			fillEbo->bind();
+			fillEbo->allocate(indices, sizeof(unsigned int) * triNum * 3);
+
+			int posAttr = -1;
+			int colAttr = -1;
+			//通过属性名从顶点着色器中获取到相应的属性location
+			posAttr = shaderProgram.attributeLocation("aPos");
+			colAttr = shaderProgram.attributeLocation("aColor");
+
+			shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * size);
+			shaderProgram.setAttributeBuffer(colAttr, GL_FLOAT, sizeof(GLfloat) * 3, 3, sizeof(GLfloat) * size);
+
+			shaderProgram.enableAttributeArray(posAttr);
+			shaderProgram.enableAttributeArray(colAttr);
+
+			shaderProgram.release();
+			fillVbo->release();
+
+			/*************************************************************************/
+
+			//边界数据 - level1
+			LineSymbol* lineSymbol = tempProcessLayer->getRender()->getLineSymbol();
+			QColor lineColor = lineSymbol->getColor();
+
+			vertices = (GLfloat*)malloc(sizeof(GLfloat)*(geometry->size()) * size);
+			for (int j = 0; j < geometry->size(); j++) {
+				GeoPoint* point = polygon->getPointAt(j);
+				float x = point->getXf();
+				float y = point->getYf();
+				vertices[j * size + 0] = GLfloat(x);
+				vertices[j * size + 1] = GLfloat(y);
+				vertices[j * size + 2] = GLfloat(0.0);
+				vertices[j * size + 3] = lineColor.red();
+				vertices[j * size + 4] = lineColor.green();
+				vertices[j * size + 5] = lineColor.blue();
+			}
+
+			QOpenGLVertexArrayObject* outlineVao = new QOpenGLVertexArrayObject();
+			outlineVao->setProperty("type", QVariant(EnumType::bufferType::VBO));
+			vaoList->push_back(outlineVao);
+
+			QOpenGLVertexArrayObject::Binder vaoBind1(outlineVao);
+			QOpenGLBuffer* outlineVbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+			outlineVbo->create();
+			outlineVbo->bind();
+			outlineVbo->allocate(vertices, sizeof(GLfloat)*(geometry->size())*size);
+
+			posAttr = -1;
+			colAttr = -1;
+			//通过属性名从顶点着色器中获取到相应的属性location
+			posAttr = shaderProgram.attributeLocation("aPos");
+			colAttr = shaderProgram.attributeLocation("aColor");
+
+			shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * size);
+			shaderProgram.setAttributeBuffer(colAttr, GL_FLOAT, sizeof(GLfloat) * 3, 3, sizeof(GLfloat) * size);
+
+			shaderProgram.enableAttributeArray(posAttr);
+			shaderProgram.enableAttributeArray(colAttr);
+
+			shaderProgram.release();
+
+			outlineVbo->release();
+		}
+		else {
+			qWarning() << "map class not set";
+		}
 	}
 }
 
@@ -327,12 +538,12 @@ void QtFunctionWidget::on_deleteLayerData(const QString& fullpath){
 	for(int i = 0; i < layer->size();i++){
 		GeoFeature* feature = layer->getFeatureAt(i);
 		GeoGeometry* obj = feature->getGeometry();
-		QOpenGLBuffer* vbo = featureVbosMap[feature];
+		QList<QOpenGLVertexArrayObject*>* list = featureVaosMap[layer->getFeatureAt(i)];
+		for (int j = 0; j < list->size(); j++) {
+			delete list->at(j);
+		}
+		delete list;
 		featureVaosMap.remove(feature);
-		delete vbo;
-		QOpenGLVertexArrayObject* vao = featureVaosMap[feature];
-		featureVaosMap.remove(feature);
-		delete vao;
 	}
 	delete map->remove(layer);
 	if (!map->size()) {
@@ -347,6 +558,29 @@ void QtFunctionWidget::on_zoomToLayerRect(const QString& fullpath)
 	GeoLayer* layer = map->getLayerByFullpath(fullpath);
 	switchLayer(layer);
 }
+
+void QtFunctionWidget::on_setSymbol(Symbol * symbol)
+{
+	if (!currentLayer->getRender()) {
+		delete currentLayer->getRender();
+	}
+	Render* render = new Render();
+	switch (symbol->getType())
+	{
+	case EnumType::MARKERSYMBOL:
+		render->setFillSymbol((FillSymbol*)symbol);
+		break;
+	case EnumType::LINESYMBOL:
+		render->setLineSymbol((LineSymbol*)symbol);
+		break;
+	case EnumType::FILLSYMBOL:
+		((FillSymbol*)symbol);
+		break;
+	default:
+		break;
+	}
+}
+
 
 void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 {

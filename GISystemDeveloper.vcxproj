@@ -153,7 +153,7 @@
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(Qt_LIBS_);$(QTDIR)\lib\Qt5Xml.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\opensslx86\lib;C:\Utils\postgresqlx86\pgsql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -187,6 +187,8 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cjson\cJSON.c" />
+    <ClCompile Include="cjson\CJsonObject.cpp" />
     <ClCompile Include="FillSymbol.cpp" />
     <ClCompile Include="GeoFeature.cpp" />
     <ClCompile Include="GeoLayer.cpp" />
@@ -195,8 +197,11 @@
     <ClCompile Include="GeoPoint.cpp" />
     <ClCompile Include="GeoPolygon.cpp" />
     <ClCompile Include="GeoPolyline.cpp" />
+    <ClCompile Include="gpc\gpc.cpp" />
     <ClCompile Include="LineSymbol.cpp" />
+    <ClCompile Include="mainwindow.cpp" />
     <ClCompile Include="MarkerSymbol.cpp" />
+    <ClCompile Include="MyRGB.cpp" />
     <ClCompile Include="QtFunctionWidget.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="main.cpp" />
@@ -205,6 +210,8 @@
     <ClCompile Include="widget.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cjson\cJSON.h" />
+    <ClInclude Include="cjson\CJsonObject.hpp" />
     <ClInclude Include="EnumType.h" />
     <ClInclude Include="FillSymbol.h" />
     <ClInclude Include="GeoFeature.h" />
@@ -214,14 +221,16 @@
     <ClInclude Include="GeoPoint.h" />
     <ClInclude Include="GeoPolygon.h" />
     <ClInclude Include="GeoPolyline.h" />
+    <ClInclude Include="gpc\gpc.h" />
     <ClInclude Include="LineSymbol.h" />
+    <QtMoc Include="widget.h" />
+    <QtMoc Include="mainwindow.h" />
     <ClInclude Include="MarkerSymbol.h" />
+    <ClInclude Include="MyRGB.h" />
     <ClInclude Include="QtFunctionWidget.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="util.h" />
-    <QtMoc Include="widget.h">
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -242,6 +251,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="mainwindow.ui" />
     <QtUic Include="widget.ui">
     </QtUic>
   </ItemGroup>

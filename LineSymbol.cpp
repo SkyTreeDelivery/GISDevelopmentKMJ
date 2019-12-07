@@ -1,9 +1,10 @@
 #include "LineSymbol.h"
-
+#include "EnumType.h"
 
 
 LineSymbol::LineSymbol()
 {
+	this->type = EnumType::LINESYMBOL;
 }
 
 
@@ -11,18 +12,18 @@ LineSymbol::~LineSymbol()
 {
 }
 
-LineSymbol::LineSymbol(int color, float width)
+LineSymbol::LineSymbol(QColor color, float width)
 {
 	this->color = color;
 	this->width = width;
 }
 
-int LineSymbol::getColor()
+QColor LineSymbol::getColor()
 {
 	return this->color;
 }
 
-void LineSymbol::setColor(int color)
+void LineSymbol::setColor(QColor color)
 {
 	this->color = color;
 }

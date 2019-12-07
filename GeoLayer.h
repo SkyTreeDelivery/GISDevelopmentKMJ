@@ -29,6 +29,8 @@ public:
 	QString getFullPath();
 	void setFullPath(QString fullpath);
     void draw();
+	
+	void bindDefaultRender();
 private:
     QList<GeoFeature*> features;
     Render* render;

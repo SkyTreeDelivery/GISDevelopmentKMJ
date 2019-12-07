@@ -1,9 +1,10 @@
 #include "MarkerSymbol.h"
-
-
+#include "qbytearray.h"
+#include "EnumType.h"
 
 MarkerSymbol::MarkerSymbol()
 {
+	this->type = EnumType::MARKERSYMBOL;
 }
 
 
@@ -11,13 +12,13 @@ MarkerSymbol::~MarkerSymbol()
 {
 }
 
-MarkerSymbol::MarkerSymbol(int color, float size)
+MarkerSymbol::MarkerSymbol(QColor color, float size)
 {
 	this->inColor = color;
 	this->size = size;
 }
 
-MarkerSymbol::MarkerSymbol(int color, float size, LineSymbol * outline)
+MarkerSymbol::MarkerSymbol(QColor color, float size, LineSymbol * outline)
 {
 	this->inColor = color;
 	this->size = size;
@@ -36,12 +37,12 @@ LineSymbol * MarkerSymbol::getOutline()
 	return this->outline;
 }
 
-void MarkerSymbol::setColor(int color)
+void MarkerSymbol::setColor(QColor color)
 {
 	this->inColor = color;
 }
 
-int MarkerSymbol::getColor()
+QColor MarkerSymbol::getColor()
 {
 	return this->inColor;
 }

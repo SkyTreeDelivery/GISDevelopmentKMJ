@@ -4,6 +4,7 @@
 #include <qsurfaceformat.h>
 #include "QtFunctionWidget.h"
 #include <QVBoxLayout>
+#include "mainwindow.h"
 
 
 int main(int argc, char *argv[])
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
 	
     /*QtFunctionWidget w1;
 	 w1.show();*/
-	Widget w;
+	MainWindow w;
 	w.setWindowTitle("mainWindow");
 
 	w.show();

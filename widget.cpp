@@ -25,7 +25,7 @@ Widget::Widget(QWidget *parent) :
 	//使用new是因为过了这个函数对象就会被销毁
 	//有两种方式添加layout或widget，一种是在顶层widget或layout构造时添加，本质可以看做是一个树状结构的添加（从下向上）
 	//一种是用顶层wedget或layout去set（自顶向下）
-	QVBoxLayout* mainLayout = new QVBoxLayout();
+	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 	this->setLayout(mainLayout);   //这就是用顶层的widget去setlayout
 	mainLayout->addWidget(genMenuBar());
 	QHBoxLayout* showLayout = new QHBoxLayout();
@@ -125,7 +125,7 @@ void Widget::on_importGeoJson_action_triggered()
     geojson_filename = QFileDialog::getOpenFileName(this,dlgTitle,curPath);
     qDebug() << geojson_filename;
 	if(geojson_filename != ""){
-		GeoLayer* layer = util::openGeoJson(geojson_filename);
+		GeoLayer* layer = util::openGeoJsonByCJson(geojson_filename);
 		glw->addlayer(layer);
 		addLayerInfo(layer);
 	}

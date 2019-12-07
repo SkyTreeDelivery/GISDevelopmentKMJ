@@ -35,8 +35,9 @@ GeoFeature * GeoLayer::removeFeatureAt(int idx)
 
 QList<GeoFeature*> GeoLayer::removeAll()
 {
+	QList<GeoFeature*> copyList = features;
 	features.clear();
-	return features;
+	return copyList;
 }
 
 void GeoLayer::setRender(Render * render)
@@ -93,6 +94,32 @@ QString GeoLayer::getTypeString()
 void GeoLayer::draw()
 {
 
+}
+
+void GeoLayer::bindDefaultRender()
+{
+	Render* render = new Render();
+	LineSymbol* lineSymbol = new LineSymbol();
+	MarkerSymbol* markerSymbol = new MarkerSymbol();
+	FillSymbol* fillSymbol = new FillSymbol();
+	QColor black;
+	QColor white;
+	QColor yellow;
+	black.setNamedColor("black");
+	white.setNamedColor("white");
+	yellow.setNamedColor("yellow");
+
+	lineSymbol->setWidth(1);
+	lineSymbol->setColor(black);
+	markerSymbol->setColor(yellow);
+	markerSymbol->setSize(1);
+	markerSymbol->setOutline(lineSymbol);
+	fillSymbol->setColor(white);
+	fillSymbol->setOutline(lineSymbol);
+	render->setMarkerSymbol(markerSymbol);
+	render->setFillSymbol(fillSymbol);
+	render->setLineSymbol(lineSymbol);
+	this->render = render;
 }
 	
 QRectF GeoLayer::getRect()

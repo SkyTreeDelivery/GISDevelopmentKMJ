@@ -1,16 +1,20 @@
 #pragma once
-class LineSymbol
+#include "qbytearray.h"
+#include "qcolor.h"
+#include "Symbol.h"
+class LineSymbol :
+	public Symbol
 {
 public:
 	LineSymbol();
 	~LineSymbol();
-	LineSymbol(int color, float width);
-	int getColor();
-	void setColor(int color);
+	LineSymbol(QColor color, float width);
+	QColor getColor();
+	void setColor(QColor color);
 	float getWidth();
 	void setWidth(float width);
 private:
-	int color;
+	QColor color;
 	float width;
 };
 

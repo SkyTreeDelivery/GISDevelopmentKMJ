@@ -3,6 +3,7 @@
 
 GeoFeature::GeoFeature(void):geometry(NULL)
 {
+	attriMap = new QMap<QString, QVariant>;
 }
 
 

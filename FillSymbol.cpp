@@ -1,9 +1,11 @@
 #include "FillSymbol.h"
+#include "EnumType.h"
 
 
 
 FillSymbol::FillSymbol()
 {
+	type = EnumType::FILLSYMBOL;
 }
 
 
@@ -11,7 +13,7 @@ FillSymbol::~FillSymbol()
 {
 }
 
-FillSymbol::FillSymbol(int color, LineSymbol * outline)
+FillSymbol::FillSymbol(QColor color, LineSymbol * outline)
 {
 	this->inColor = color;
 	this->outline = outline;
@@ -27,12 +29,12 @@ LineSymbol * FillSymbol::getOutline()
 	return this->outline;
 }
 
-void FillSymbol::setColor(int color)
+void FillSymbol::setColor(QColor color)
 {
 	this->inColor = color;
 }
 
-int FillSymbol::getColor()
+QColor FillSymbol::getColor()
 {
 	return this->inColor;
 }

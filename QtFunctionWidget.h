@@ -33,8 +33,7 @@ private:
 	
 	GeoMap* map;
     QOpenGLShaderProgram shaderProgram;
-    QMap<GeoFeature*,QOpenGLBuffer*>  featureVbosMap;
-	QMap<GeoFeature*,QOpenGLVertexArrayObject*> featureVaosMap;
+	QMap<GeoFeature*, QList<QOpenGLVertexArrayObject*>*> featureVaosMap;
 
 	GeoLayer* currentLayer; //储存当前图层，对影响,用于显示与操作
 	GeoLayer* tempProcessLayer; //用于处理数据读入配置的中转图层
@@ -76,7 +75,6 @@ private:
 public slots:
 	void on_deleteLayerData(const QString& fullpath);
 	void on_zoomToLayerRect(const QString& fullpath);
-
-
+	void on_setSymbol(Symbol* symbol);
 };
 

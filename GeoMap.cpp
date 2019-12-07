@@ -47,6 +47,8 @@ GeoLayer * GeoMap::remove(GeoLayer * layer)
 
 QList<GeoLayer*> GeoMap::removeAll()
 {
+
+	QList<GeoLayer*> copyList = layers;
 	layers.clear();
 	return layers;
 }

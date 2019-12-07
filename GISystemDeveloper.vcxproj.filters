@@ -35,6 +35,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="dependency">
+      <UniqueIdentifier>{f19c3176-8667-428a-825d-011817da256c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeoLayer.cpp">
@@ -61,9 +64,6 @@
     <ClCompile Include="util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="QtFunctionWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -84,6 +84,24 @@
     </ClCompile>
     <ClCompile Include="FillSymbol.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mainwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cjson\CJsonObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyRGB.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cjson\cJSON.c">
+      <Filter>dependency</Filter>
+    </ClCompile>
+    <ClCompile Include="gpc\gpc.cpp">
+      <Filter>dependency</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -108,9 +126,6 @@
     <ClInclude Include="util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <QtMoc Include="widget.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <ClInclude Include="QtFunctionWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -135,6 +150,18 @@
     <ClInclude Include="FillSymbol.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="cjson\CJsonObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MyRGB.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cjson\cJSON.h">
+      <Filter>dependency</Filter>
+    </ClInclude>
+    <ClInclude Include="gpc\gpc.h">
+      <Filter>dependency</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -148,5 +175,16 @@
     <QtUic Include="widget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="mainwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="mainwindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="widget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>
