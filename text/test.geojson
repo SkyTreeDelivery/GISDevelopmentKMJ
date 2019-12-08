@@ -1,7 +1,0 @@
-{
-"type": "FeatureCollection",
-"name": "test",
-"features": [
-{ "type": "Feature", "properties": { "TARGET_FID": 0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 2000,0 ], [ 0, 2000 ], [ 0, 0 ]] ] } }
-]
-}
