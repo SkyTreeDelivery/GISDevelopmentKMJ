@@ -15,7 +15,7 @@ public:
 	void addFeature(GeoFeature* feature);
 	GeoFeature* removeFeatureAt(int idx);
 	QList<GeoFeature*> removeAll();
-	void setRender(Render* render);
+	Render* setRender(Render* render);
 	Render* getRender();
 	int size();
 	void setType(int type);
@@ -29,7 +29,8 @@ public:
 	QString getFullPath();
 	void setFullPath(QString fullpath);
     void draw();
-	
+	bool isWaitingRendered();
+	void setWaitingRendered(bool b);
 	void bindDefaultRender();
 private:
     QList<GeoFeature*> features;
@@ -38,6 +39,7 @@ private:
 	QString name;
 	bool visibility;
 	QString fullpath;
+	bool waitingRendered;
 };
 
 #endif // GEOLAYER_H

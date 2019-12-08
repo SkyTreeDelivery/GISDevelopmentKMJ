@@ -51,7 +51,7 @@ GeoLayer* util::openGeoJson(QString path)
     QJsonArray featuresJ = jsonData["features"].toArray();
 	GeoLayer* layer = new GeoLayer();
 	layer->bindDefaultRender();
-	layer->setFullPath(file.fileName());
+	layer->setFullPath(path);
     for(int i = 0; i < featuresJ.size(); i++){
 		QJsonObject featureJ = featuresJ.at(i).toObject();
 		GeoFeature* feature = new GeoFeature();
@@ -251,6 +251,7 @@ FillSymbol* util::parseSLD_Fill(QString path)
 			lineSymbol->setWidth(outlineWidth.toFloat());
 		}
 	}
+	file.close();
 	return fillSymbol;
 }
 

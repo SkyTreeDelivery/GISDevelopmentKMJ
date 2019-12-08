@@ -88,9 +88,6 @@
     <ClCompile Include="mainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="cjson\CJsonObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,6 +99,9 @@
     </ClCompile>
     <ClCompile Include="gpc\gpc.cpp">
       <Filter>dependency</Filter>
+    </ClCompile>
+    <ClCompile Include="StyleWidget.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -172,9 +172,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="widget.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="mainwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -183,7 +180,7 @@
     <QtMoc Include="mainwindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="widget.h">
+    <QtMoc Include="StyleWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

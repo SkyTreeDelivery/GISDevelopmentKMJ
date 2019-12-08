@@ -18,16 +18,7 @@ QtFunctionWidget::~QtFunctionWidget(){
     shaderProgram.release();
     doneCurrent();
 	for(int i = 0; i < map->size();i++){
-		GeoLayer* layer = map->getLayerAt(i);
-		for(int j = 0; j < layer->size();j++){
-			QList<QOpenGLVertexArrayObject*>* list = featureVaosMap[layer->getFeatureAt(j)];
-			for (int i = 0; i < list->size(); i++) {
-				QOpenGLVertexArrayObject* vao = list->at(i);
-				vao->destroy();
-				delete vao;
-			}
-			delete list;
-		}
+		deleteLayer(map->getLayerAt(i));
 	}
 	
 	//最后处理map，以防止关联的obj为NULL
@@ -75,8 +66,8 @@ void QtFunctionWidget::resizeGL(int w, int h){
 	QPointF center = worldRect.center();
 	float width = worldRect.width() * w * 1.0 / this->w;
 	float height = worldRect.height() * h * 1.0 / this->h;
-	worldRect = QRectF(QPoint(center.x() - width / 2, center.y() - height / 2)
-		, QPoint(center.x() + width / 2, center.y() + height / 2));
+	worldRect = QRectF(QPointF(center.x() - width / 2, center.y() - height / 2)
+		, QPointF(center.x() + width / 2, center.y() + height / 2));
 	this->w = w;
 	this->h = h;
     project();    //更新投影
@@ -122,55 +113,43 @@ void QtFunctionWidget::paintGL(){
 //函数对外开放，只负责向等待队列中添加待加载图层，从而实现异步加载
 void QtFunctionWidget::addlayer(GeoLayer* layer)
 {
-	waitLoadedLayers.push_back(layer);
+	if (!isExist(layer)) {
+		waitLoadedLayers.push_back(layer);
+	}
 }
+void QtFunctionWidget::renderLayer(GeoLayer * layer)
+{
+	if (layer) {
+		layer->setWaitingRendered(true);
+		waitLoadedLayers.push_back(layer);
+	}
+}
+
 void QtFunctionWidget::changeLayer(GeoLayer* layer)
 {
-	waitLoadedLayers.push_back(layer);
-}
-void QtFunctionWidget::changeLayer(QString name)
-{
-	for(int i = 0; i < map->size(); i++){
-		if(name == map->getLayerAt(i)->getName()){
-			waitLoadedLayers.push_back(map->getLayerAt(i));
-		}
+	if (isExist(layer)) {
+		waitLoadedLayers.push_back(layer);
 	}
 }
-void QtFunctionWidget::removeLayer(GeoLayer* layer)
+void QtFunctionWidget::changeLayer(QString fullpath)
 {
-	for(int i = 0; i < map->size(); i++){
-		if(layer == map->getLayerAt(i)){
-			map->removeLayerAt(i);
-			if(currentLayer == layer){
-				if(map->size()){
-					currentLayer = map->getLayerAt(0);
-				}else{
-				    currentLayer = NULL;
-					hasSetRect = false;
-				}
-			}
-			delete layer;
-			break;
+	changeLayer(map->getLayerByFullpath(fullpath));
+}
+
+GeoLayer* QtFunctionWidget::removeLayer(GeoLayer* layer)
+{
+	if (isExist(layer)) {
+		releaseVaos(layer);
+		if (!map->size()) {
+			hasSetRect = false;
+			hasWaH = false;
 		}
+		return map->remove(layer);
 	}
 }
-void QtFunctionWidget::removeLayer(QString name)
+GeoLayer* QtFunctionWidget::removeLayer(QString fullpath)
 {
-	for(int i = 0; i < map->size(); i++){
-		if(name == map->getLayerAt(i)->getName()){
-			map->removeLayerAt(i);
-			if(currentLayer == map->getLayerAt(i)){
-				if(map->size()){
-					currentLayer = map->getLayerAt(0);
-				}else{
-				    currentLayer = NULL;
-					hasSetRect = false;
-				}
-			}
-			delete map->getLayerAt(i);
-			break;
-		}
-	}
+	return removeLayer(map->getLayerByFullpath(fullpath));
 }
 bool QtFunctionWidget::isExist(GeoLayer* layer)
 {
@@ -181,52 +160,67 @@ bool QtFunctionWidget::isExist(GeoLayer* layer)
 	}
 	return false;
 }
-bool QtFunctionWidget::isExist(QString* name)
+bool QtFunctionWidget::isExist(QString fullpath)
 {
 	for(int i = 0; i < map->size(); i++){
-		if(name == map->getLayerAt(i)->getName()){
+		if(fullpath == map->getLayerAt(i)->getFullPath()){
 			return true;
 		}
 	}
 	return false;
 }
 
+void QtFunctionWidget::strongUpdata()
+{
+	project();
+	update();
+}
+
+//note that ：不要使initLayer在其他的代码中被显示调用，如想对图层进行操作，请使用addlayer和deletelayer ！！！！！原因如下
 //与gl绘图相关的函数必须在init，resize和paintgl中被调用，除此之外不会加载，因此需要将数据加载和绘图分离，以异步的方式完成整个加载流程
+//如果你想知道在这三个函数之外调用回发生什么，请自己尝试，反正我debug了很久踩的坑。在使用bindVaos函数的时候，其他一切正常，但是对于内存中储存的数据造成了破坏，具体原因未知
 void QtFunctionWidget::initLayer(GeoLayer* layer)
 {
 	if(!isExist(layer)){
 		map->addLayer(layer);
 		tempProcessLayer = layer;
-		bindVao();
+		bindVaos(layer);
+	}
+	else {
+		if (layer->isWaitingRendered()) {
+			releaseVaos(layer);
+			bindVaos(layer);
+			project();    //数据可能发生了变化，因此调用一次，这里不适用update()
+		}
 	}
 	if(!hasSetRect){   //第一次配置
 		switchLayer(layer);
+		switchWorldRect(layer);
 		hasSetRect = true;
 	}
 }
 
 void QtFunctionWidget::initLayer(QString fullpath)
 {
-	GeoLayer* layer = map->getLayerByFullpath(fullpath);
-	initLayer(layer);
+	initLayer(map->getLayerByFullpath(fullpath));
 }
 void QtFunctionWidget::switchLayer(GeoLayer* layer)
 {
 	if(isExist(layer)){
 		currentLayer = layer;
-		switchWorldRect(layer);
 	}
 }
 void QtFunctionWidget::switchLayer(QString fullpath)
 {
-	GeoLayer* layer = map->getLayerByFullpath(fullpath);
-	switchLayer(layer);
+	switchLayer(map->getLayerByFullpath(fullpath));
 }
 void QtFunctionWidget::switchWorldRect(GeoLayer* layer)
 {
-	initWorldRect(layer);
-	project();
-	update();
+	if (isExist(layer)) {
+		initWorldRect(layer);
+		project();
+		update();
+	}
 }
 void QtFunctionWidget::switchWorldRect(QString fullpath)
 {
@@ -244,8 +238,10 @@ void QtFunctionWidget::loadWaitLayers()
 }
 
 
-void QtFunctionWidget::bindVao()
+void QtFunctionWidget::bindVaos(GeoLayer* layer)
 {
+	QList<QOpenGLBuffer*>* boList = new QList<QOpenGLBuffer*>;
+	layerBosMap.insert(layer, boList);
 	for(int i = 0;i < tempProcessLayer->size();i++){
 		/*GeoFeature* feature = tempProcessLayer->getFeatureAt(i);
 		GeoGeometry* geometry = feature->getGeometry();
@@ -283,13 +279,13 @@ void QtFunctionWidget::bindVao()
 			qWarning() << "map class not set";
 		}*/
 
-		GeoFeature* feature = tempProcessLayer->getFeatureAt(i);
+		GeoFeature* feature = layer->getFeatureAt(i);
 		GeoGeometry* geometry = feature->getGeometry();
 		//开辟空间并保存记录
 		int size = 6;
 		if (geometry->getType() == EnumType::POINT) {
 			GLfloat* vertices = (GLfloat*)malloc(sizeof(GLfloat)*(geometry->size()) * size);
-			MarkerSymbol* markerSymbol = tempProcessLayer->getRender()->getMarkerSymbol();
+			MarkerSymbol* markerSymbol = layer->getRender()->getMarkerSymbol();
 			QColor color = markerSymbol->getColor();
 			GeoPoint* point = (GeoPoint*)geometry;
 			float x = point->getXf();
@@ -312,7 +308,8 @@ void QtFunctionWidget::bindVao()
 			vbo->create();
 			vbo->bind();
 			vbo->allocate(vertices, sizeof(GLfloat)*(geometry->size())*size);
-
+			
+			boList->push_back(vbo);
 
 			int posAttr = -1;
 			int colAttr = -1;
@@ -333,7 +330,7 @@ void QtFunctionWidget::bindVao()
 		else if (geometry->getType() == EnumType::POLYLINE) {
 			GLfloat* vertices = (GLfloat*)malloc(sizeof(GLfloat)*(geometry->size()) * size);
 			GeoPolyline* polyline = (GeoPolyline*)geometry;
-			LineSymbol* lineSymbol = tempProcessLayer->getRender()->getLineSymbol();
+			LineSymbol* lineSymbol = layer->getRender()->getLineSymbol();
 			QColor color = lineSymbol->getColor();
 			for (int j = 0; j < geometry->size(); j++) {
 				GeoPoint* point = polyline->getPointAt(j);
@@ -359,6 +356,8 @@ void QtFunctionWidget::bindVao()
 			vbo->bind();
 			vbo->allocate(vertices, sizeof(GLfloat)*(geometry->size())*size);
 
+			boList->push_back(vbo);
+
 			int posAttr = -1;
 			int colAttr = -1;
 			//通过属性名从顶点着色器中获取到相应的属性location
@@ -383,7 +382,7 @@ void QtFunctionWidget::bindVao()
 			GLfloat* vertices = NULL;
 
 			//剖分三角
-			FillSymbol* fillSymbol = tempProcessLayer->getRender()->getFillSymbol();
+			FillSymbol* fillSymbol = layer->getRender()->getFillSymbol();
 			QColor fillColor = fillSymbol->getColor();
 
 			//三角剖分数据 - level0
@@ -411,9 +410,9 @@ void QtFunctionWidget::bindVao()
 					vertices[idx * size + 0] = GLfloat(x);
 					vertices[idx * size + 1] = GLfloat(y);
 					vertices[idx * size + 2] = GLfloat(0.0);
-					vertices[idx * size + 3] = fillColor.red();
-					vertices[idx * size + 4] = fillColor.green();
-					vertices[idx * size + 5] = fillColor.blue();
+					vertices[idx * size + 3] = fillColor.red()*1.0/255;
+					vertices[idx * size + 4] = fillColor.green()*1.0/255;
+					vertices[idx * size + 5] = fillColor.blue()*1.0/255;
 					idx++;
 				}
 			}
@@ -441,11 +440,13 @@ void QtFunctionWidget::bindVao()
 			fillVbo->create();
 			fillVbo->bind();
 			fillVbo->allocate(vertices, sizeof(GLfloat) * size * vertexNum);
+			boList->push_back(fillVbo);
 
 			QOpenGLBuffer* fillEbo = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
 			fillEbo->create();
 			fillEbo->bind();
 			fillEbo->allocate(indices, sizeof(unsigned int) * triNum * 3);
+			boList->push_back(fillEbo);
 
 			int posAttr = -1;
 			int colAttr = -1;
@@ -465,7 +466,7 @@ void QtFunctionWidget::bindVao()
 			/*************************************************************************/
 
 			//边界数据 - level1
-			LineSymbol* lineSymbol = tempProcessLayer->getRender()->getLineSymbol();
+			LineSymbol* lineSymbol = layer->getRender()->getLineSymbol();
 			QColor lineColor = lineSymbol->getColor();
 
 			vertices = (GLfloat*)malloc(sizeof(GLfloat)*(geometry->size()) * size);
@@ -533,23 +534,14 @@ void QtFunctionWidget::project()
 	shaderProgram.release();
 }
 
+
+void QtFunctionWidget::on_addLayerData(GeoLayer* layer) {
+	addlayer(layer);
+}
+
 void QtFunctionWidget::on_deleteLayerData(const QString& fullpath){
 	GeoLayer* layer = map->getLayerByFullpath(fullpath);
-	for(int i = 0; i < layer->size();i++){
-		GeoFeature* feature = layer->getFeatureAt(i);
-		GeoGeometry* obj = feature->getGeometry();
-		QList<QOpenGLVertexArrayObject*>* list = featureVaosMap[layer->getFeatureAt(i)];
-		for (int j = 0; j < list->size(); j++) {
-			delete list->at(j);
-		}
-		delete list;
-		featureVaosMap.remove(feature);
-	}
-	delete map->remove(layer);
-	if (!map->size()) {
-		hasSetRect = false;
-		hasWaH = false;
-	} 
+	deleteLayer(layer);
 	update();
 }
 
@@ -557,28 +549,23 @@ void QtFunctionWidget::on_zoomToLayerRect(const QString& fullpath)
 {
 	GeoLayer* layer = map->getLayerByFullpath(fullpath);
 	switchLayer(layer);
+	switchWorldRect(layer);
 }
 
 void QtFunctionWidget::on_setSymbol(Symbol * symbol)
 {
-	if (!currentLayer->getRender()) {
-		delete currentLayer->getRender();
+	Render* render = currentLayer->getRender();
+	int type = symbol->getType();
+	if (type == EnumType::MARKERSYMBOL) {
+		delete render->setMarkerSymbol((MarkerSymbol*)symbol);
 	}
-	Render* render = new Render();
-	switch (symbol->getType())
-	{
-	case EnumType::MARKERSYMBOL:
-		render->setFillSymbol((FillSymbol*)symbol);
-		break;
-	case EnumType::LINESYMBOL:
-		render->setLineSymbol((LineSymbol*)symbol);
-		break;
-	case EnumType::FILLSYMBOL:
-		((FillSymbol*)symbol);
-		break;
-	default:
-		break;
+	else if (type == EnumType::LINESYMBOL) {
+		delete render->setLineSymbol((LineSymbol*)symbol);
 	}
+	else if (type == EnumType::FILLSYMBOL) {
+		delete render->setFillSymbol((FillSymbol*)symbol);
+	}
+	renderLayer(currentLayer);   //样式发生了变化因此重新渲染
 }
 
 
@@ -642,6 +629,42 @@ void QtFunctionWidget::wheelEvent(QWheelEvent *e)
 	}
 }
 
+void QtFunctionWidget::releaseVaos(GeoLayer* layer)
+{
+	if (isExist(layer)) {
+		QList<QOpenGLBuffer*>* list = layerBosMap[layer];
+		for (int j = 0; j < list->size(); j++) {
+			list->at(j)->destroy();
+			delete list->at(j);
+		}
+		for (int i = 0; i < layer->size(); i++) {
+			GeoFeature* feature = layer->getFeatureAt(i);
+			QList<QOpenGLVertexArrayObject*>* list = featureVaosMap[layer->getFeatureAt(i)];
+			for (int j = 0; j < list->size(); j++) {
+				delete list->at(j);
+			}
+			delete list;
+			featureVaosMap.remove(feature);
+		}
+	}
+}
+
+void QtFunctionWidget::deleteLayer(GeoLayer * layer)
+{
+	if (isExist(layer)) {
+		releaseVaos(layer);
+		delete map->remove(layer);
+		if (!map->size()) {
+			hasSetRect = false;
+			hasWaH = false;
+		}
+		else {
+			switchLayer(map->getLayerAt(0));
+		}
+	}
+}
+
+//平移
 void QtFunctionWidget::refreshWorldRectForTrans(QPoint begin, QPoint end)
 {
 	QPointF worldPointBegin = screenToWorld(begin);
@@ -652,22 +675,15 @@ void QtFunctionWidget::refreshWorldRectForTrans(QPoint begin, QPoint end)
 	worldRect = QRectF(leftTopPoint - moveVector, rightBottomPoint - moveVector);
 }
 
+//缩放
 void QtFunctionWidget::refreshWorldRectForScale(QPoint originScreen, float scale)
 {
-	qDebug() << "center"<< originScreen;
 	QPointF originWorld = screenToWorld(originScreen);
-	qDebug() << "origin rect" << worldRect;
-	qDebug() << "origin cneter" << originWorld;
 	QPointF leftTop = worldRect.topLeft();
-	qDebug() << "origin lefttop" << leftTop;
 	QPointF rightBottom = worldRect.bottomRight();
-	qDebug() << "origin rightBottom" << rightBottom;
 	QPointF newLeftTop = (leftTop - originWorld)*scale + originWorld;
-	qDebug() << "new lefttop" << newLeftTop;
 	QPointF newRightBottom = (rightBottom - originWorld)*scale + originWorld;
-	qDebug() << "new rightBottom" << newRightBottom;
 	worldRect = QRectF(newLeftTop, newRightBottom);
-	qDebug() << "更变矩形" << worldRect;
 }
 
 
@@ -714,6 +730,7 @@ void QtFunctionWidget::initWorldRect(GeoLayer* layer)
 	worldRect = QRect(leftTop, QSize(layerWidth, layerHeight));
 }
 
+//TODO 判断resize的拉伸方向
 int QtFunctionWidget::getResizeDirection(QRect oriRect, QRect newRect)
 {
 	int oleft = oriRect.left();

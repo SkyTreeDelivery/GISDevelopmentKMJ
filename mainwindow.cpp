@@ -1,7 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "widget.h"
-#include "ui_widget.h"
 #include <QMenu>
 #include <QPushButton>
 #include <QMenuBar>
@@ -19,7 +17,7 @@
 #include <qt_windows.h>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
+    QMainWindow(parent), currItem(NULL), sw(NULL),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -77,9 +75,12 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(fileTree, &QOpenGLWidget::customContextMenuRequested, this, &MainWindow::on_fileTree_contextMenu_request);
 	//connect(glw,&QOpenGLWidget::customContextMenuRequested,this,&Widget::on_glw_contextMenu_request);
 
+	connect(this, &MainWindow::addLayerSignal, glw, &QtFunctionWidget::on_addLayerData);
 	connect(this, &MainWindow::deleteLayerSignal, glw, &QtFunctionWidget::on_deleteLayerData);
 	connect(this, &MainWindow::zoomToLayerSignal, glw, &QtFunctionWidget::on_zoomToLayerRect);
 	connect(this, &MainWindow::setSymbolSignal, glw, &QtFunctionWidget::on_setSymbol);
+
+	connect(fileTree, &QTreeWidget::itemChanged, this, &MainWindow::on_item_changed);
 
 	initRightClickMenu();
 }
@@ -94,9 +95,13 @@ void MainWindow::initRightClickMenu()
 	fileMenu = new QMenu(this);
 	QAction* zoomToLayerAction = fileMenu->addAction(QString("zoom to layer"));
 	QAction* deleteLayerAction = fileMenu->addAction(QString("delete Layer"));
-
+	fileMenu->addSeparator();
+	QAction* set_SLD = fileMenu->addAction(QString::fromLocal8Bit("read SLD"));
+	QAction* set_style = fileMenu->addAction(QString::fromLocal8Bit("set style"));
 	connect(zoomToLayerAction, SIGNAL(triggered()), this, SLOT(on_zoomToLayer_action_triggered()));
 	connect(deleteLayerAction, SIGNAL(triggered()), this, SLOT(on_deleteLayer_action_triggered()));
+	connect(set_SLD, SIGNAL(triggered()), this, SLOT(on_setSLD_action_triggered()));
+	connect(set_style, SIGNAL(triggered()), this, SLOT(on_setStyle_action_triggered()));
 	/*glwMenu = new QMenu(this);
 	QAction* deleteLayerActionTest = glwMenu->addAction(QString("glw"));*/
 	//connect(deleteLayerActionTest, SIGNAL(triggered()), this, SLOT(on_deleteLayer_action_triggered()));
@@ -105,19 +110,15 @@ void MainWindow::initRightClickMenu()
 void MainWindow::initMenuBar()
 {
 	QMenuBar* menuBar = this->menuBar();
-	//QMenu
 	QMenu *pMenu = new QMenu("import file", this);
 
 	//import file QMenu
 	QAction* import_geojson = pMenu->addAction(QString::fromLocal8Bit("import geojson"));
 	QAction* import_shapefile = pMenu->addAction(QString::fromLocal8Bit("import shapefile"));
-	pMenu->addSeparator();
-	QAction* set_SLD = pMenu->addAction(QString::fromLocal8Bit("set SLD"));
 
 	//event
 	connect(import_geojson, SIGNAL(triggered()), this, SLOT(on_importGeoJson_action_triggered()));
 	connect(import_shapefile, SIGNAL(triggered()), this, SLOT(on_importShapeFile_action_triggered()));
-	connect(set_SLD, SIGNAL(triggered()), this, SLOT(on_setSLD_action_triggered()));
 
 	//addMenu
 	menuBar->addMenu(pMenu);
@@ -132,8 +133,10 @@ void MainWindow::on_importGeoJson_action_triggered()
 	qDebug() << geojson_filename;
 	if (geojson_filename != "") {
 		GeoLayer* layer = util::openGeoJson(geojson_filename);
-		glw->addlayer(layer);
-		addLayerInfo(layer);
+		if (!glw->isExist(geojson_filename)) {
+			emit addLayerSignal(layer);
+			addLayerInfo(layer);
+		}
 	}
 }
 
@@ -157,6 +160,28 @@ void MainWindow::on_setSLD_action_triggered()
 	}
 }
 
+void MainWindow::on_setStyle_action_triggered()
+{
+	QTreeWidgetItem* newItem = fileTree->currentItem();
+	initStyleWidget(newItem);
+}
+
+void MainWindow::initStyleWidget(QTreeWidgetItem* newItem) {
+	if (newItem != currItem) {
+		if (currItem != NULL) {
+			sw->close();  //必须先关闭再close;
+			delete sw;
+		}
+		GeoLayer* layer = itemLayerMap[newItem];
+		sw = new StyleWidget(layer);
+		connect(sw, &StyleWidget::renderLayerSignal, this, &MainWindow::on_style_Changed);
+		sw->setWindowTitle(QString("set style ::") + layer->getFullPath());
+		connect(sw, &StyleWidget::closeSignal, this, &MainWindow::on_styleWidget_closed);
+		sw->show();
+		currItem = newItem;
+	}
+}
+
 void MainWindow::on_fileTree_contextMenu_request(const QPoint &pos)
 {
 	//处理filetree右键事件
@@ -171,6 +196,30 @@ void MainWindow::on_glw_contextMenu_request(const QPoint &pos)
 {
 	//处理filetree右键事件
 	glwMenu->exec(QCursor::pos());
+}
+
+void MainWindow::on_item_changed(QTreeWidgetItem *item)
+{
+	GeoLayer* layer = itemLayerMap[item];
+	if (item->checkState(0) == Qt::Checked) {
+		layer->setVisable(true);
+		glw -> update();
+	}
+	else {
+		layer->setVisable(false);
+		glw->update();
+	}
+}
+
+void MainWindow::on_styleWidget_closed()
+{
+	currItem = NULL;
+}
+
+void MainWindow::on_style_Changed(GeoLayer * layer)
+{
+	glw->renderLayer(layer);
+	glw->update();
 }
 
 void MainWindow::on_deleteLayer_action_triggered()
@@ -196,6 +245,7 @@ void MainWindow::addLayerInfo(GeoLayer* layer)
 	QString type = layer->getTypeString();
 	QString size = QVariant(layer->size()).toString();
 	QTreeWidgetItem* A = new QTreeWidgetItem(QStringList() << name << type << size);
+	itemLayerMap.insert(A, layer);
 	A->setCheckState(0, Qt::Checked);
 	fileTree->addTopLevelItem(A);
 }

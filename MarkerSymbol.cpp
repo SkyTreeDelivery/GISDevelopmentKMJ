@@ -10,6 +10,7 @@ MarkerSymbol::MarkerSymbol()
 
 MarkerSymbol::~MarkerSymbol()
 {
+	delete outline;
 }
 
 MarkerSymbol::MarkerSymbol(QColor color, float size)

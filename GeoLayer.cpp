@@ -1,5 +1,6 @@
 #include "geolayer.h"
 #include "EnumType.h"
+#include "util.h"
 
 GeoLayer::GeoLayer():render(NULL),visibility(true)
 {
@@ -40,9 +41,14 @@ QList<GeoFeature*> GeoLayer::removeAll()
 	return copyList;
 }
 
-void GeoLayer::setRender(Render * render)
+Render* GeoLayer::setRender(Render * newRender)
 {
-	this->render = render;
+	Render* oldRender = NULL;
+	if (this->render) {
+		oldRender = this->render;
+	}
+	this->render = newRender;
+	return oldRender;
 }
 
 Render * GeoLayer::getRender()
@@ -96,6 +102,16 @@ void GeoLayer::draw()
 
 }
 
+bool GeoLayer::isWaitingRendered()
+{
+	return this->waitingRendered;
+}
+
+void GeoLayer::setWaitingRendered(bool b)
+{
+	this->waitingRendered = b;
+}
+
 void GeoLayer::bindDefaultRender()
 {
 	Render* render = new Render();
@@ -116,6 +132,7 @@ void GeoLayer::bindDefaultRender()
 	markerSymbol->setOutline(lineSymbol);
 	fillSymbol->setColor(white);
 	fillSymbol->setOutline(lineSymbol);
+
 	render->setMarkerSymbol(markerSymbol);
 	render->setFillSymbol(fillSymbol);
 	render->setLineSymbol(lineSymbol);

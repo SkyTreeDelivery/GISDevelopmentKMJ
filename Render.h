@@ -16,9 +16,9 @@ public:
     Render();
 	~Render();
     void draw(QList<GeoGeometry*> objs);
-	void setMarkerSymbol(MarkerSymbol* markerSymbol);
-	void setLineSymbol(LineSymbol* lineSymbol);
-	void setFillSymbol(FillSymbol* fillSymbol);
+	Symbol* setMarkerSymbol(MarkerSymbol* markerSymbol);
+	Symbol* setLineSymbol(LineSymbol* lineSymbol);
+	Symbol* setFillSymbol(FillSymbol* fillSymbol);
 	MarkerSymbol* getMarkerSymbol();
 	LineSymbol* getLineSymbol();
 	FillSymbol* getFillSymbol();

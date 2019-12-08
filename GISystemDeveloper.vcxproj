@@ -153,7 +153,7 @@
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(Qt_LIBS_);$(QTDIR)\lib\Qt5Xml.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(Qt_LIBS_);$(QTDIR)\lib\Qt5Xmld.lib;$(QTDIR)\lib\Qt5Guid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\opensslx86\lib;C:\Utils\postgresqlx86\pgsql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -205,9 +205,9 @@
     <ClCompile Include="QtFunctionWidget.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="StyleWidget.cpp" />
     <ClCompile Include="Symbol.cpp" />
     <ClCompile Include="util.cpp" />
-    <ClCompile Include="widget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cjson\cJSON.h" />
@@ -223,12 +223,12 @@
     <ClInclude Include="GeoPolyline.h" />
     <ClInclude Include="gpc\gpc.h" />
     <ClInclude Include="LineSymbol.h" />
-    <QtMoc Include="widget.h" />
     <QtMoc Include="mainwindow.h" />
     <ClInclude Include="MarkerSymbol.h" />
     <ClInclude Include="MyRGB.h" />
     <ClInclude Include="QtFunctionWidget.h" />
     <ClInclude Include="Render.h" />
+    <QtMoc Include="StyleWidget.h" />
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
@@ -252,8 +252,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="mainwindow.ui" />
-    <QtUic Include="widget.ui">
-    </QtUic>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
