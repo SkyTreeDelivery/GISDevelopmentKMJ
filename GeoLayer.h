@@ -32,6 +32,9 @@ public:
 	bool isWaitingRendered();
 	void setWaitingRendered(bool b);
 	void bindDefaultRender();
+	void setSource(int source);
+	int getSource();
+	QString getSourceName();
 private:
     QList<GeoFeature*> features;
     Render* render;
@@ -40,6 +43,7 @@ private:
 	bool visibility;
 	QString fullpath;
 	bool waitingRendered;
+	int source;
 };
 
 #endif // GEOLAYER_H

@@ -6,7 +6,7 @@
 #include "GeoMap.h"
 
 namespace Ui {
-class Widget;
+class StyleWidget;
 }
 
 class StyleWidget : public QWidget
@@ -21,7 +21,7 @@ protected:
 		void closeEvent(QCloseEvent *event);
 
 private:
-    Ui::Widget *ui;
+    Ui::StyleWidget *ui;
 	QTreeWidget* styleTree;
 	void initTree(GeoLayer* layer);
 	GeoLayer* layer;

@@ -25,6 +25,8 @@ SOURCES += main.cpp\
     GeoPolygon.cpp \
     GeoPoint.cpp
 
+RESOURCES += qdarkstyle/style.qrc
+
 HEADERS  += widget.h \
     util.h \
     GeoMap.h \
@@ -36,3 +38,10 @@ HEADERS  += widget.h \
     GeoPolyline.h
 
 FORMS    += widget.ui
+
+
+win32:CONFIG(release, debug|release): LIBS += -LE:/gdal/lib/ -lgdal_i
+else:win32:CONFIG(debug, debug|release): LIBS += -LE:/gdal/lib/ -lgdal_i
+
+INCLUDEPATH += E:/gdal/include
+DEPENDPATH += E:/gdal/include

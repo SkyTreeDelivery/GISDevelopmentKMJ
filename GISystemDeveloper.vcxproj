@@ -134,7 +134,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(QTDIR)\include;debug;\include;$(QTDIR)\mkspecs\win32-msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\gdal\include;.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(QTDIR)\include;debug;\include;$(QTDIR)\mkspecs\win32-msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>debug\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -153,8 +153,8 @@
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(Qt_LIBS_);$(QTDIR)\lib\Qt5Xmld.lib;$(QTDIR)\lib\Qt5Guid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\opensslx86\lib;C:\Utils\postgresqlx86\pgsql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(Qt_LIBS_);$(QTDIR)\lib\Qt5Xmld.lib;$(QTDIR)\lib\Qt5Guid.lib;E:\gdal\lib\gdal_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\gdal\lib;C:\opensslx86\lib;C:\Utils\postgresqlx86\pgsql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -199,9 +199,11 @@
     <ClCompile Include="GeoPolyline.cpp" />
     <ClCompile Include="gpc\gpc.cpp" />
     <ClCompile Include="LineSymbol.cpp" />
+    <ClCompile Include="LinewidthDialog.cpp" />
     <ClCompile Include="mainwindow.cpp" />
     <ClCompile Include="MarkerSymbol.cpp" />
     <ClCompile Include="MyRGB.cpp" />
+    <ClCompile Include="postgisDialog.cpp" />
     <ClCompile Include="QtFunctionWidget.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="main.cpp" />
@@ -224,11 +226,14 @@
     <ClInclude Include="gpc\gpc.h" />
     <ClInclude Include="LineSymbol.h" />
     <QtMoc Include="mainwindow.h" />
+    <QtMoc Include="LinewidthDialog.h" />
     <ClInclude Include="MarkerSymbol.h" />
     <ClInclude Include="MyRGB.h" />
+    <QtMoc Include="postgisDialog.h" />
     <ClInclude Include="QtFunctionWidget.h" />
     <ClInclude Include="Render.h" />
     <QtMoc Include="StyleWidget.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
@@ -251,7 +256,16 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="LinewidthDialog.ui" />
     <QtUic Include="mainwindow.ui" />
+    <QtUic Include="postgisDialog.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GISystemDeveloper.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="qdarkstyle\style.qrc" />
+    <QtRcc Include="Resource.qrc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

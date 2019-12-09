@@ -121,22 +121,40 @@ void GeoLayer::bindDefaultRender()
 	QColor black;
 	QColor white;
 	QColor yellow;
+	QColor EEEEEE;
 	black.setNamedColor("black");
 	white.setNamedColor("white");
 	yellow.setNamedColor("yellow");
-
+	EEEEEE.setNamedColor("#EEEEEE");
 	lineSymbol->setWidth(1);
 	lineSymbol->setColor(black);
 	markerSymbol->setColor(yellow);
 	markerSymbol->setSize(1);
 	markerSymbol->setOutline(lineSymbol);
-	fillSymbol->setColor(white);
+	fillSymbol->setColor(EEEEEE);
 	fillSymbol->setOutline(lineSymbol);
 
 	render->setMarkerSymbol(markerSymbol);
 	render->setFillSymbol(fillSymbol);
 	render->setLineSymbol(lineSymbol);
 	this->render = render;
+}
+
+void GeoLayer::setSource(int source)
+{
+	this->source = source;
+}
+
+int GeoLayer::getSource()
+{
+	return this->source;
+}
+
+QString GeoLayer::getSourceName()
+{
+	if (this->source == EnumType::source::GEOJSON) return "GeoJson";
+	else if (this->source == EnumType::source::SHAPEFILE) return "ShapeFile";
+	else if (this->source == EnumType::source::POSTGRESQL) return "PostgreSql";
 }
 	
 QRectF GeoLayer::getRect()

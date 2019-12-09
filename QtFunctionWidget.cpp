@@ -76,11 +76,11 @@ void QtFunctionWidget::resizeGL(int w, int h){
 
 
 void QtFunctionWidget::paintGL(){
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	loadWaitLayers();   //所有的关于gl的添加逻辑在此执行
 	if(!map->size()){
 		return;
 	}
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     shaderProgram.bind();
     {
@@ -88,6 +88,10 @@ void QtFunctionWidget::paintGL(){
 		for(int j = 0; j < map->size();j++){
 			GeoLayer* layer = map->getLayerAt(j);
 			if(layer->isVisable()){
+				int type = layer->getType();
+				if (type == EnumType::POINT) glLineWidth(layer->getRender()->getMarkerSymbol()->getOutline()->getWidth());
+				else if(type == EnumType::POLYLINE) glLineWidth(layer->getRender()->getLineSymbol()->getWidth());
+				else if (type = EnumType::POLYGON) glLineWidth(layer->getRender()->getFillSymbol()->getOutline()->getWidth());
 				for(int i = 0; i < layer->size();i++){
 					GeoFeature* feature = layer->getFeatureAt(i);
 					QList<QOpenGLVertexArrayObject*>* vaos = featureVaosMap[feature];
@@ -243,42 +247,6 @@ void QtFunctionWidget::bindVaos(GeoLayer* layer)
 	QList<QOpenGLBuffer*>* boList = new QList<QOpenGLBuffer*>;
 	layerBosMap.insert(layer, boList);
 	for(int i = 0;i < tempProcessLayer->size();i++){
-		/*GeoFeature* feature = tempProcessLayer->getFeatureAt(i);
-		GeoGeometry* geometry = feature->getGeometry();
-		//开辟空间并保存记录
-		GLfloat* vertices = (GLfloat*)malloc(sizeof(vertices)*(geometry->size())*3);
-		if(geometry->getType() == EnumType::POINT){
-			GeoPoint* point = (GeoPoint*)geometry;
-			float x = point->getXf();
-			float y = point->getYf();
-			vertices[0] = GLfloat(x);
-			vertices[1] = GLfloat(y);
-			vertices[2] = GLfloat(0.0);
-		}else if(geometry->getType() == EnumType::POLYLINE){
-			GeoPolyline* polyline = (GeoPolyline*)geometry;
-			for(int j = 0; j < geometry->size();j++){	
-				GeoPoint* point = polyline->getPointAt(j);
-				float x = point->getXf();
-				float y = point->getYf();
-				vertices[j*3+0] = GLfloat(x);
-				vertices[j*3+1] = GLfloat(y);
-				vertices[j*3+2] = GLfloat(0.0);
-			}
-		}else if(geometry->getType() == EnumType::POLYGON){
-			GeoPolygon* polygon = (GeoPolygon*)geometry;
-			for(int j = 0; j < geometry->size();j++){	
-				GeoPoint* point = polygon->getPointAt(j);
-				float x = point->getXf();
-				float y = point->getYf();
-				vertices[j*3+0] = GLfloat(x);
-				vertices[j*3+1] = GLfloat(y);
-				vertices[j*3+2] = GLfloat(0.0);
-			}
-		}
-		else {
-			qWarning() << "map class not set";
-		}*/
-
 		GeoFeature* feature = layer->getFeatureAt(i);
 		GeoGeometry* geometry = feature->getGeometry();
 		//开辟空间并保存记录
@@ -293,9 +261,9 @@ void QtFunctionWidget::bindVaos(GeoLayer* layer)
 			vertices[0] = GLfloat(x);
 			vertices[1] = GLfloat(y);
 			vertices[2] = GLfloat(0.0);
-			vertices[3] = color.red();
-			vertices[4] = color.green();
-			vertices[5] = color.blue();
+			vertices[3] = color.red()*1.0/255;
+			vertices[4] = color.green()*1.0/255;
+			vertices[5] = color.blue()*1.0/255;
 
 			QList<QOpenGLVertexArrayObject*>* vaoList = new QList<QOpenGLVertexArrayObject*>();
 			QOpenGLVertexArrayObject* vao = new QOpenGLVertexArrayObject();
@@ -339,9 +307,9 @@ void QtFunctionWidget::bindVaos(GeoLayer* layer)
 				vertices[j * size + 0] = GLfloat(x);
 				vertices[j * size + 1] = GLfloat(y);
 				vertices[j * size + 2] = GLfloat(0.0);
-				vertices[j * size + 3] = color.red();
-				vertices[j * size + 4] = color.green();
-				vertices[j * size + 5] = color.blue();
+				vertices[j * size + 3] = color.red()*1.0 / 255;
+				vertices[j * size + 4] = color.green()*1.0 / 255;
+				vertices[j * size + 5] = color.blue()*1.0 * 255;
 			}
 
 			QList<QOpenGLVertexArrayObject*>* vaoList = new QList<QOpenGLVertexArrayObject*>();
@@ -477,9 +445,9 @@ void QtFunctionWidget::bindVaos(GeoLayer* layer)
 				vertices[j * size + 0] = GLfloat(x);
 				vertices[j * size + 1] = GLfloat(y);
 				vertices[j * size + 2] = GLfloat(0.0);
-				vertices[j * size + 3] = lineColor.red();
-				vertices[j * size + 4] = lineColor.green();
-				vertices[j * size + 5] = lineColor.blue();
+				vertices[j * size + 3] = lineColor.red()*1.0/255;
+				vertices[j * size + 4] = lineColor.green()*1.0/255;
+				vertices[j * size + 5] = lineColor.blue()*1.0/255;
 			}
 
 			QOpenGLVertexArrayObject* outlineVao = new QOpenGLVertexArrayObject();
@@ -539,15 +507,13 @@ void QtFunctionWidget::on_addLayerData(GeoLayer* layer) {
 	addlayer(layer);
 }
 
-void QtFunctionWidget::on_deleteLayerData(const QString& fullpath){
-	GeoLayer* layer = map->getLayerByFullpath(fullpath);
+void QtFunctionWidget::on_deleteLayerData(GeoLayer* layer){
 	deleteLayer(layer);
 	update();
 }
 
-void QtFunctionWidget::on_zoomToLayerRect(const QString& fullpath)
+void QtFunctionWidget::on_zoomToLayerRect(GeoLayer* layer)
 {
-	GeoLayer* layer = map->getLayerByFullpath(fullpath);
 	switchLayer(layer);
 	switchWorldRect(layer);
 }

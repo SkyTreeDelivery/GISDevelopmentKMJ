@@ -36,18 +36,19 @@ private:
 	QTreeWidgetItem* curItem;
 	QMap<QTreeWidgetItem*, GeoLayer*> itemLayerMap; 
 	StyleWidget* sw;
-	QTreeWidgetItem * currItem;
+	QTreeWidgetItem* oldOpenedItem;
 
 	void initStyleWidget(QTreeWidgetItem* newItem);
 
 signals:
 	void addLayerSignal(GeoLayer* layer);
-	void deleteLayerSignal(const QString& name);
-	void zoomToLayerSignal(const QString& name);
+	void deleteLayerSignal(GeoLayer* layer);
+	void zoomToLayerSignal(GeoLayer* layer);
 	void setSymbolSignal(Symbol* symbol);
 public slots:  //必须声明为slots才行
 	void on_importGeoJson_action_triggered();
 	void on_importShapeFile_action_triggered();
+	void on_importFileFromPostgresql_action_triggered();
 
 	void on_zoomToLayer_action_triggered();
 	void on_deleteLayer_action_triggered();

@@ -83,8 +83,8 @@ private:
 
 public slots:
 	void on_addLayerData(GeoLayer* layer);
-	void on_deleteLayerData(const QString& fullpath);
-	void on_zoomToLayerRect(const QString& fullpath);
+	void on_deleteLayerData(GeoLayer* layer);
+	void on_zoomToLayerRect(GeoLayer* layer);
 	void on_setSymbol(Symbol* symbol);
 };
 

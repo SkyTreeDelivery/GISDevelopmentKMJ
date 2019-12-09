@@ -9,6 +9,7 @@
 #include "FillSymbol.h"
 #include "qcolor.h"
 #include "gpc/gpc.h"
+#include"ogrsf_frmts.h"
 class util
 {
 public:
@@ -25,6 +26,8 @@ public:
 	//static QByteArray setDefaultAlpha(QByteArray color);
 	static QColor parseColor(QString hexNamedColor);  //使用qcolor方便很多，不用自己解析了
 	static void tesselation(GeoPolygon* polygon, gpc_tristrip* tristrip);
+	static GeoLayer* openShapeFile(QString path);
+	static GeoLayer* openFileFromPostgresql(QString path, QString layername);
 };
 
 #endif // UTIL_H
