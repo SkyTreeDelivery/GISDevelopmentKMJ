@@ -2,7 +2,8 @@
 #include "EnumType.h"
 #include "util.h"
 
-GeoLayer::GeoLayer():render(NULL),visibility(true)
+GeoLayer::GeoLayer():render(NULL),visibility(true), selectMode(EnumType::selectMode::SINGLEMODE),
+dataChangeType(EnumType::dataChangedType::NOCHANGEDATA)
 {
 	type = -1;
 }
@@ -97,23 +98,11 @@ QString GeoLayer::getTypeString()
 
 //由于QTCreater不是采用定时编译，也就不能实时地告知编写错误，也不能对没有编译的变量进行提示，如果想要自动提示新添加的变量，就需要进行一次编译
 
-void GeoLayer::draw()
-{
-
-}
-
-bool GeoLayer::isWaitingRendered()
-{
-	return this->waitingRendered;
-}
-
-void GeoLayer::setWaitingRendered(bool b)
-{
-	this->waitingRendered = b;
-}
-
 void GeoLayer::bindDefaultRender()
 {
+	if (render) {
+		delete render;
+	}
 	Render* render = new Render();
 	LineSymbol* lineSymbol = new LineSymbol();
 	LineSymbol* markerOutlineSymbol = new LineSymbol();
@@ -136,9 +125,9 @@ void GeoLayer::bindDefaultRender()
 	fillOutlineSymbol->setColor(black);
 	markerSymbol->setColor(yellow);
 	markerSymbol->setSize(1);
-	markerSymbol->setOutline(fillOutlineSymbol);
+	markerSymbol->setOutline(markerOutlineSymbol);
 	fillSymbol->setColor(EEEEEE);
-	fillSymbol->setOutline(markerOutlineSymbol);
+	fillSymbol->setOutline(fillOutlineSymbol);
 
 	render->setMarkerSymbol(markerSymbol);
 	render->setFillSymbol(fillSymbol);
@@ -173,6 +162,26 @@ QList<QString> GeoLayer::getAttributeNames()
 	return layerAttributeNames;
 }
 
+void GeoLayer::setSelectMode(int mode)
+{
+	this->selectMode = mode;
+}
+
+int GeoLayer::getSelectMode()
+{
+	return selectMode;
+}
+
+void GeoLayer::setDataChangedType(int type)
+{
+	dataChangeType = type;
+}
+
+int GeoLayer::getDataChangedType()
+{
+	return dataChangeType;
+}
+
 GeoFeature * GeoLayer::identify(GeoPoint * point, GeoLayer * layer)
 {
 	return nullptr;
@@ -186,6 +195,54 @@ QList<GeoFeature*> GeoLayer::search(GeoLayer * layer, QString attriName, QString
 QList<QString> GeoLayer::getAttriNames(GeoLayer * layer)
 {
 	return QList<QString>();
+}
+
+void GeoLayer::setSelectionColor(QColor color)
+{
+	render->configSelection(color);
+}
+
+void GeoLayer::setSelectionWidth(float width)
+{
+	render->configSelection(width);
+}
+
+void GeoLayer::setSelectionconfiguration(QColor color, float width)
+{
+	render->configSelection(color, width);
+}
+
+void GeoLayer::selectFeature(GeoFeature * feature)
+{
+	if (selectMode == EnumType::selectMode::SINGLEMODE) {
+		if (selectedFeatures.size()) {
+			selectedFeatures.clear();
+		}
+		selectedFeatures.push_back(feature);
+	}
+	else if (selectMode == EnumType::selectMode::MULTIMODE) {
+		if (!selectedFeatures.contains(feature)) {
+			selectedFeatures.push_back(feature);
+		}
+	}
+}
+
+QList<GeoFeature*> GeoLayer::getSelectedFeatures()
+{
+	return selectedFeatures;
+}
+
+bool GeoLayer::hasSelected(GeoFeature * feature)
+{
+	if (selectedFeatures.contains(feature)) {
+		return true;
+	}
+	return false;
+}
+
+void GeoLayer::clearFeatures()
+{
+	selectedFeatures.clear();
 }
 	
 QRectF GeoLayer::getRect()

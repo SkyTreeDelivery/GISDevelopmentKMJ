@@ -67,6 +67,8 @@ private:
 	void switchWorldRect(QString fullpath);
    //------------------------------------------------------------------------
 
+	void setDefaultRenderColor(Render* render,int type);
+	void setSelectedRenderColor(Render* render, int type);
 	void releaseVaos(GeoLayer* layer);
 	void bindVaos(GeoLayer* layer);
 	void project();   //使用世界窗口进行投影

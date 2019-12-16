@@ -11,7 +11,7 @@ FillSymbol::FillSymbol()
 
 FillSymbol::~FillSymbol()
 {
-	delete outline;
+	if(outline) delete outline;
 }
 
 FillSymbol::FillSymbol(QColor color, LineSymbol * outline)
