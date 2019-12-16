@@ -23,6 +23,11 @@ GeoFeature * GeoLayer::getFeatureAt(int i)
 	return features.at(i);
 }
 
+QList<GeoFeature*> GeoLayer::getAllFeature()
+{
+	return features;
+}
+
 void GeoLayer::addFeature(GeoFeature * feature)
 {
 	features.push_back(feature);
@@ -182,14 +187,37 @@ int GeoLayer::getDataChangedType()
 	return dataChangeType;
 }
 
-GeoFeature * GeoLayer::identify(GeoPoint * point, GeoLayer * layer)
+GeoFeature * GeoLayer::Identify(GeoPoint * point, GeoLayer * layer,int threshold)
 {
-	return nullptr;
+	GeoFeature *featureFound;
+	if (layer->indexMode == EnumType::GRIDINDEX)
+		featureFound = static_cast<GridIndex*>(spatialIndex)->searchGrid(point, threshold);
+	else if (layer->indexMode == EnumType::QUADTREE)
+		featureFound = static_cast<QuadTree*>(spatialIndex)->SearchQuadTree(point, threshold);
+	return featureFound;
 }
 
 QList<GeoFeature*> GeoLayer::search(GeoLayer * layer, QString attriName, QString attriValue)
 {
-	return QList<GeoFeature*>();
+	QList<GeoFeature*>features = layer->getAllFeature();
+	QList<GeoFeature*>featuresFound;//保存找到的要素
+	for (int i = 0; i < features.size(); i++)//遍历layer上的所有要素
+	{
+		GeoFeature* feature = features.at(i);
+		QList<QString> keys = feature->getAttributeMap()->keys();
+		QList<QVariant> values = feature->getAttributeMap()->values();
+		for (int j = 0; j < keys.size(); j++)
+		{
+			if (keys.at(j) == attriName)//如果是要查找的属性名
+			{
+				if (values.at(j).toString().contains(attriValue))//如果输入的属性值是要素属性值的一部分
+				{
+					featuresFound.append(feature);
+				}
+			}
+		}
+	}
+	return featuresFound;
 }
 
 QList<QString> GeoLayer::getAttriNames(GeoLayer * layer)
@@ -243,6 +271,21 @@ bool GeoLayer::hasSelected(GeoFeature * feature)
 void GeoLayer::clearFeatures()
 {
 	selectedFeatures.clear();
+}
+
+void GeoLayer::setIndexMode(int mode)
+{
+	indexMode = mode;
+}
+
+int GeoLayer::getIndexMode()
+{
+	return indexMode;
+}
+
+void GeoLayer::setSpatialIndex(Index *idx)
+{
+	spatialIndex = idx;
 }
 	
 QRectF GeoLayer::getRect()

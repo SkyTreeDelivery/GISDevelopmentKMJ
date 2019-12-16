@@ -552,10 +552,15 @@ void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 {
 	if(e->button() == Qt::LeftButton){   //ÓÒ¼ü
 		if (operateMode == EnumType::operateMode::IDENTIFY) {
-
+			QPointF worldPoint = screenToWorld(e->pos());
+			GeoFeature* feature = currentLayer->Identify(&GeoPoint(worldPoint), currentLayer, worldRect.width() / 250);
+			currentLayer->setSelectMode(EnumType::selectMode::SINGLEMODE);
+			currentLayer->selectFeature(feature);
 		}
 	}else if(e->button() == Qt::RightButton){   //×ó¼ü
-       
+		if (operateMode == EnumType::operateMode::IDENTIFY) {
+			operateMode = EnumType::operateMode::NORMOL;
+	   }
 	}else if(e->button() == Qt::MidButton){   //¹öÂÖµ¥»÷
 		//³õÊ¼»¯
 		screenPointBegin = e->pos();
