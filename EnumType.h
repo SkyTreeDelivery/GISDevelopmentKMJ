@@ -10,5 +10,6 @@ public:
 	enum bufferType {VBO,EBO};
 	enum styleType {FILLCOLOR,LINEWIDTH,LINECOLOR,MARKERWIDTH,MARKETCOLOR};
 	enum source {GEOJSON,SHAPEFILE,POSTGRESQL};
+	enum operateMode {NORMOL,IDENTIFY};
 };
 

@@ -35,6 +35,13 @@ public:
 	void setSource(int source);
 	int getSource();
 	QString getSourceName();
+	void setAttributeNames(QList<QString> names);
+	QList<QString> getAttributeNames();
+	//Ê¶±ð
+	GeoFeature* identify(GeoPoint* point, GeoLayer* layer);
+	//²éÑ¯
+	QList<GeoFeature*> search(GeoLayer* layer,QString attriName, QString attriValue);
+	QList<QString> getAttriNames(GeoLayer* layer);
 private:
     QList<GeoFeature*> features;
     Render* render;
@@ -44,6 +51,7 @@ private:
 	QString fullpath;
 	bool waitingRendered;
 	int source;
+	QList<QString> layerAttributeNames;
 };
 
 #endif // GEOLAYER_H

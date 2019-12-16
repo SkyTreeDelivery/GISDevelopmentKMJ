@@ -20,6 +20,7 @@ public:
 	bool isExist(QString fullpath);
 	void strongUpdata(); //开放给父类使用，调用project和update，对应
 	void renderLayer(GeoLayer* layer);   //数据和renderer发生了变化的时候调用
+	void switchOpenrateMode(int operateMode);
 
 protected:
     virtual void initializeGL() Q_DECL_OVERRIDE;
@@ -34,7 +35,7 @@ private:
 	QMap<GeoLayer*, QList<QOpenGLBuffer*>*> layerBosMap;
 
 	GeoLayer* currentLayer; //储存当前图层，对影响,用于显示与操作
-	GeoLayer* tempProcessLayer; //用于处理数据读入配置的中转图层
+	//GeoLayer* tempProcessLayer; //用于处理数据读入配置的中转图层
 	QList<GeoLayer*> waitLoadedLayers;
 
 	int w;
@@ -49,6 +50,7 @@ private:
 	QPoint screenPointDuring;
 	QPoint screenPointEnd;
 	float scale;
+	int operateMode;
 
 	//-------------------之间的函数会保证安全性，不用额外判断---------------------
 	void addlayer(GeoLayer* layer);

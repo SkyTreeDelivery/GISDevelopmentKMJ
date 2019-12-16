@@ -116,6 +116,8 @@ void GeoLayer::bindDefaultRender()
 {
 	Render* render = new Render();
 	LineSymbol* lineSymbol = new LineSymbol();
+	LineSymbol* markerOutlineSymbol = new LineSymbol();
+	LineSymbol* fillOutlineSymbol = new LineSymbol();
 	MarkerSymbol* markerSymbol = new MarkerSymbol();
 	FillSymbol* fillSymbol = new FillSymbol();
 	QColor black;
@@ -128,11 +130,15 @@ void GeoLayer::bindDefaultRender()
 	EEEEEE.setNamedColor("#EEEEEE");
 	lineSymbol->setWidth(1);
 	lineSymbol->setColor(black);
+	markerOutlineSymbol->setWidth(1);
+	markerOutlineSymbol->setColor(black);
+	fillOutlineSymbol->setWidth(1);
+	fillOutlineSymbol->setColor(black);
 	markerSymbol->setColor(yellow);
 	markerSymbol->setSize(1);
-	markerSymbol->setOutline(lineSymbol);
+	markerSymbol->setOutline(fillOutlineSymbol);
 	fillSymbol->setColor(EEEEEE);
-	fillSymbol->setOutline(lineSymbol);
+	fillSymbol->setOutline(markerOutlineSymbol);
 
 	render->setMarkerSymbol(markerSymbol);
 	render->setFillSymbol(fillSymbol);
@@ -155,6 +161,31 @@ QString GeoLayer::getSourceName()
 	if (this->source == EnumType::source::GEOJSON) return "GeoJson";
 	else if (this->source == EnumType::source::SHAPEFILE) return "ShapeFile";
 	else if (this->source == EnumType::source::POSTGRESQL) return "PostgreSql";
+}
+
+void GeoLayer::setAttributeNames(QList<QString> names)
+{
+	layerAttributeNames = names;
+}
+
+QList<QString> GeoLayer::getAttributeNames()
+{
+	return layerAttributeNames;
+}
+
+GeoFeature * GeoLayer::identify(GeoPoint * point, GeoLayer * layer)
+{
+	return nullptr;
+}
+
+QList<GeoFeature*> GeoLayer::search(GeoLayer * layer, QString attriName, QString attriValue)
+{
+	return QList<GeoFeature*>();
+}
+
+QList<QString> GeoLayer::getAttriNames(GeoLayer * layer)
+{
+	return QList<QString>();
 }
 	
 QRectF GeoLayer::getRect()

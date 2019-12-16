@@ -129,6 +129,11 @@ void QtFunctionWidget::renderLayer(GeoLayer * layer)
 	}
 }
 
+void QtFunctionWidget::switchOpenrateMode(int operateMode)
+{
+	this->operateMode = operateMode;
+}
+
 void QtFunctionWidget::changeLayer(GeoLayer* layer)
 {
 	if (isExist(layer)) {
@@ -187,11 +192,12 @@ void QtFunctionWidget::initLayer(GeoLayer* layer)
 {
 	if(!isExist(layer)){
 		map->addLayer(layer);
-		tempProcessLayer = layer;
+		currentLayer = layer;
 		bindVaos(layer);
 	}
 	else {
 		if (layer->isWaitingRendered()) {
+			currentLayer = layer;
 			releaseVaos(layer);
 			bindVaos(layer);
 			project();    //数据可能发生了变化，因此调用一次，这里不适用update()
@@ -246,7 +252,7 @@ void QtFunctionWidget::bindVaos(GeoLayer* layer)
 {
 	QList<QOpenGLBuffer*>* boList = new QList<QOpenGLBuffer*>;
 	layerBosMap.insert(layer, boList);
-	for(int i = 0;i < tempProcessLayer->size();i++){
+	for(int i = 0;i < currentLayer->size();i++){
 		GeoFeature* feature = layer->getFeatureAt(i);
 		GeoGeometry* geometry = feature->getGeometry();
 		//开辟空间并保存记录
@@ -434,7 +440,7 @@ void QtFunctionWidget::bindVaos(GeoLayer* layer)
 			/*************************************************************************/
 
 			//边界数据 - level1
-			LineSymbol* lineSymbol = layer->getRender()->getLineSymbol();
+			LineSymbol* lineSymbol = layer->getRender()->getFillSymbol()->getOutline();
 			QColor lineColor = lineSymbol->getColor();
 
 			vertices = (GLfloat*)malloc(sizeof(GLfloat)*(geometry->size()) * size);
@@ -505,6 +511,7 @@ void QtFunctionWidget::project()
 
 void QtFunctionWidget::on_addLayerData(GeoLayer* layer) {
 	addlayer(layer);
+	update();
 }
 
 void QtFunctionWidget::on_deleteLayerData(GeoLayer* layer){
@@ -538,7 +545,9 @@ void QtFunctionWidget::on_setSymbol(Symbol * symbol)
 void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 {
 	if(e->button() == Qt::LeftButton){   //右键
-		
+		if (operateMode == EnumType::operateMode::IDENTIFY) {
+
+		}
 	}else if(e->button() == Qt::RightButton){   //左键
        
 	}else if(e->button() == Qt::MidButton){   //滚轮单击

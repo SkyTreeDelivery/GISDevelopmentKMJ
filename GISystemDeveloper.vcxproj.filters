@@ -105,13 +105,16 @@
     <ClCompile Include="gpc\gpc.cpp">
       <Filter>dependency</Filter>
     </ClCompile>
-    <ClCompile Include="StyleWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LinewidthDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="postgisDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SearchWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StyleDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -195,18 +198,24 @@
     <QtUic Include="postgisDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="SearchWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mainwindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="StyleWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="LinewidthDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="postgisDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="SearchWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="StyleDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

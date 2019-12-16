@@ -1,24 +1,21 @@
 #ifndef WIDGET_H
 #define WIDGET_H
 #include <qtreewidget.h>
-
-#include <QWidget>
+#include <qdialog.h>
 #include "GeoMap.h"
 
 namespace Ui {
 class StyleWidget;
 }
 
-class StyleWidget : public QWidget
+class StyleDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit StyleWidget(GeoLayer* layer, QWidget *parent = nullptr);
-    ~StyleWidget(); 
+    explicit StyleDialog(GeoLayer* layer, QWidget *parent = nullptr);
+    ~StyleDialog(); 
 
-protected:
-		void closeEvent(QCloseEvent *event);
 
 private:
     Ui::StyleWidget *ui;
@@ -29,7 +26,6 @@ private:
 	FillSymbol* fill;
 	QMap<QTreeWidgetItem*, int> itemType;
 signals:
-	void closeSignal();
 	void renderLayerSignal(GeoLayer* layer);
 public slots:
 	void on_item_clicked(QTreeWidgetItem* item);

@@ -1,4 +1,4 @@
-#include "StyleWidget.h"
+#include "StyleDialog.h"
 #include <qtreewidget.h>
 #include <QVBoxLayout>
 #include "GeoLayer.h"
@@ -7,8 +7,8 @@
 #include <qcolordialog.h>
 #include "LineWidthDialog.h"
 
-StyleWidget::StyleWidget(GeoLayer* layer, QWidget *parent) :
-	QWidget(parent),layer(layer)
+StyleDialog::StyleDialog(GeoLayer* layer, QWidget *parent) :
+	QDialog(parent),layer(layer)
 {
 	QVBoxLayout* layout = new QVBoxLayout();
 	styleTree = new QTreeWidget();
@@ -16,20 +16,16 @@ StyleWidget::StyleWidget(GeoLayer* layer, QWidget *parent) :
 	setLayout(layout);
 	resize(500, 200);
 	initTree(layer);
-	connect(styleTree, &QTreeWidget::itemDoubleClicked, this, &StyleWidget::on_item_clicked);
+	connect(styleTree, &QTreeWidget::itemDoubleClicked, this, &StyleDialog::on_item_clicked);
 }
 
-StyleWidget::~StyleWidget()
+StyleDialog::~StyleDialog()
 {
 
 }
 
-void StyleWidget::closeEvent(QCloseEvent * event)
-{
-	emit closeSignal();
-}
 
-void StyleWidget::initTree(GeoLayer* layer)
+void StyleDialog::initTree(GeoLayer* layer)
 {
 	styleTree->header()->hide();
 	int type = layer->getType();
@@ -70,7 +66,7 @@ void StyleWidget::initTree(GeoLayer* layer)
 	}
 }
 
-void StyleWidget::on_item_clicked(QTreeWidgetItem* item) {
+void StyleDialog::on_item_clicked(QTreeWidgetItem* item) {
 	if (itemType.contains(item)) {
 		int type = itemType[item];   //itemType[item] 这种方式必须要使得item在itemtype，如不在map中，会自动添加一个默认的值给value，需要先判断是否包含
 		if (type == EnumType::LINECOLOR) {
