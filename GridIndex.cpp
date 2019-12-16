@@ -2,6 +2,7 @@
 
 GridIndex::GridIndex()
 {
+	this->type = EnumType::indexMode::GRIDINDEX;
 }
 
 GridIndex::~GridIndex()

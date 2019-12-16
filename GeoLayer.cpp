@@ -3,7 +3,7 @@
 #include "util.h"
 
 GeoLayer::GeoLayer():render(NULL),visibility(true), selectMode(EnumType::selectMode::SINGLEMODE),
-dataChangeType(EnumType::dataChangedType::NOCHANGEDATA)
+dataChangeType(EnumType::dataChangedType::NOCHANGEDATA), indexMode(EnumType::indexMode::QUADTREE)
 {
 	type = -1;
 }
@@ -187,13 +187,15 @@ int GeoLayer::getDataChangedType()
 	return dataChangeType;
 }
 
-GeoFeature * GeoLayer::Identify(GeoPoint * point, GeoLayer * layer,int threshold)
+GeoFeature * GeoLayer::identify(GeoPoint * point, GeoLayer * layer,int threshold)
 {
 	GeoFeature *featureFound;
-	if (layer->indexMode == EnumType::GRIDINDEX)
+	if (layer->getIndexMode() == EnumType::GRIDINDEX) {
 		featureFound = static_cast<GridIndex*>(spatialIndex)->searchGrid(point, threshold);
-	else if (layer->indexMode == EnumType::QUADTREE)
+	}
+	else if (layer->getIndexMode() == EnumType::QUADTREE) {
 		featureFound = static_cast<QuadTree*>(spatialIndex)->SearchQuadTree(point, threshold);
+	}
 	return featureFound;
 }
 
@@ -281,6 +283,16 @@ void GeoLayer::setIndexMode(int mode)
 int GeoLayer::getIndexMode()
 {
 	return indexMode;
+}
+
+void GeoLayer::setIndex(Index * index)
+{
+	this->spatialIndex = index;
+}
+
+Index * GeoLayer::getIndex()
+{
+	return this->spatialIndex;
 }
 
 void GeoLayer::setSpatialIndex(Index *idx)

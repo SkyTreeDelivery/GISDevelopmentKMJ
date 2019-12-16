@@ -46,16 +46,18 @@ public:
 	int getDataChangedType();
 	void bindDefaultRender();
 	void setAttributeNames(QList<QString> names);
+	void setIndexMode(int mode);
+	int getIndexMode();
+	void setIndex(Index* index);
+	Index* getIndex();
 	
 //与空间查询相关的：
 	//识别
-	GeoFeature *Identify(GeoPoint *point, GeoLayer *layer, int threshold);
+	GeoFeature *identify(GeoPoint *point, GeoLayer *layer, int threshold);
 	//查询
 	QList<GeoFeature*> search(GeoLayer* layer, QString attriName, QString attriValue);
 	QList<QString> getAttriNames(GeoLayer *layer);
     //获取和添加索引类型
-	void setIndexMode(int mode);
-	int getIndexMode();
 	//添加索引
 	void setSpatialIndex(Index *idx);
 	

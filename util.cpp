@@ -57,6 +57,7 @@ GeoLayer* util::openGeoJson(QString path)
 	layer->bindDefaultRender();
 	layer->setFullPath(path);
 	layer->setName(path.mid(path.lastIndexOf("/")+1,path.lastIndexOf(".") - path.lastIndexOf("/")-1));
+	layer->setIndexMode(EnumType::indexMode::QUADTREE);
     for(int i = 0; i < featuresJ.size(); i++){
 		QJsonObject featureJ = featuresJ.at(i).toObject();
 		GeoFeature* feature = new GeoFeature();
@@ -126,8 +127,17 @@ GeoLayer* util::openGeoJson(QString path)
 			feature->setGemetry(point);
 			layer->addFeature(feature);
 		}
-
     }
+	if (layer->getIndexMode() == EnumType::indexMode::GRIDINDEX) {
+		GridIndex* gridIndex = new GridIndex;
+		gridIndex->setGrid(layer->getRect(), layer->getAllFeature());
+		layer->setIndex(gridIndex);
+	}
+	else if (layer->getIndexMode() == EnumType::indexMode::QUADTREE) {
+		QuadTree* quadTree = new QuadTree;
+		quadTree->CreateQuadTree(layer->getRect(),layer->getAllFeature());
+		layer->setIndex(quadTree);
+	}
 	if(layer->size()){
 		return layer;
 	}
