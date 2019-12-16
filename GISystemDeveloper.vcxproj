@@ -198,6 +198,9 @@
     <ClCompile Include="GeoPolygon.cpp" />
     <ClCompile Include="GeoPolyline.cpp" />
     <ClCompile Include="gpc\gpc.cpp" />
+    <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="GridIndex.cpp" />
+    <ClCompile Include="Index.cpp" />
     <ClCompile Include="LineSymbol.cpp" />
     <ClCompile Include="LinewidthDialog.cpp" />
     <ClCompile Include="mainwindow.cpp" />
@@ -205,6 +208,8 @@
     <ClCompile Include="MyRGB.cpp" />
     <ClCompile Include="postgisDialog.cpp" />
     <ClCompile Include="QtFunctionWidget.cpp" />
+    <ClCompile Include="QuadNode.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SearchWidget.cpp" />
@@ -225,6 +230,9 @@
     <ClInclude Include="GeoPolygon.h" />
     <ClInclude Include="GeoPolyline.h" />
     <ClInclude Include="gpc\gpc.h" />
+    <ClInclude Include="Grid.h" />
+    <ClInclude Include="GridIndex.h" />
+    <ClInclude Include="Index.h" />
     <ClInclude Include="LineSymbol.h" />
     <QtMoc Include="mainwindow.h" />
     <QtMoc Include="LinewidthDialog.h" />
@@ -232,6 +240,8 @@
     <ClInclude Include="MyRGB.h" />
     <QtMoc Include="postgisDialog.h" />
     <ClInclude Include="QtFunctionWidget.h" />
+    <ClInclude Include="QuadNode.h" />
+    <ClInclude Include="QuadTree.h" />
     <ClInclude Include="Render.h" />
     <QtMoc Include="StyleDialog.h" />
     <ClInclude Include="resource.h" />

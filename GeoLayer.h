@@ -1,23 +1,31 @@
 #ifndef GEOLAYER_H
 #define GEOLAYER_H
 #include <QList>
+#include <QtNetwork/qnetworkrequest.h>
+#include<QtNetwork/qnetworkreply.h>
+#include<QtNetwork/qnetworkaccessmanager.h>
 #include "Render.h"
 #include "EnumType.h"
 #include "GeoGeometry.h"
 #include "GeoFeature.h"
+
+#include"GridIndex.h"
+#include "QuadTree.h"
+#include"gpc/gpc.h"
 
 class GeoLayer
 {
 public:
     GeoLayer();
 	~GeoLayer();
-
 	GeoFeature* getFeatureAt(int i);
+	QList<GeoFeature*> getAllFeature();
 	void addFeature(GeoFeature* feature);
 	GeoFeature* removeFeatureAt(int idx);
 	QList<GeoFeature*> removeAll();
 	Render* setRender(Render* render);
 	Render* getRender();
+	int size();
 	void setType(int type);
 	int getType();
 	QString getName();
@@ -36,15 +44,21 @@ public:
 	int getSelectMode();
 	void setDataChangedType(int type);
 	int getDataChangedType();
-
-	int size();
 	void bindDefaultRender();
 	void setAttributeNames(QList<QString> names);
+	
+//与空间查询相关的：
 	//识别
-	GeoFeature* identify(GeoPoint* point, GeoLayer* layer);
+	GeoFeature *Identify(GeoPoint *point, GeoLayer *layer, int threshold);
 	//查询
-	QList<GeoFeature*> search(GeoLayer* layer,QString attriName, QString attriValue);
-	QList<QString> getAttriNames(GeoLayer* layer);
+	QList<GeoFeature*> search(GeoLayer* layer, QString attriName, QString attriValue);
+	QList<QString> getAttriNames(GeoLayer *layer);
+    //获取和添加索引类型
+	void setIndexMode(int mode);
+	int getIndexMode();
+	//添加索引
+	void setSpatialIndex(Index *idx);
+	
 	void setSelectionColor(QColor color);  //所有的要素使用同种色彩与线宽进行配置
 	void setSelectionWidth(float width);
 	void setSelectionconfiguration(QColor color,float width);
@@ -64,6 +78,9 @@ private:
 	QList<GeoFeature*> selectedFeatures;
 	int selectMode;
 	int dataChangeType;
+	//索引
+	int indexMode;//索引模式
+	Index *spatialIndex;
 };
 
 #endif // GEOLAYER_H

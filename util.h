@@ -10,6 +10,11 @@
 #include "qcolor.h"
 #include "gpc/gpc.h"
 #include"ogrsf_frmts.h"
+
+#include"Index.h"
+#include"GridIndex.h"
+#include"QuadTree.h"
+
 class util
 {
 public:
