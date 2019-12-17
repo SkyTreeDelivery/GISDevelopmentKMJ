@@ -440,6 +440,37 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 	return NULL;
 }
 
+QList<GeoFeature*> util::search(GeoLayer * layer, QString attriName, QString attriValue)
+{
+	QList<GeoFeature*>features = layer->getAllFeature();
+	QList<GeoFeature*>featuresFound;//保存找到的要素
+	for (int i = 0; i < features.size(); i++)//遍历layer上的所有要素
+	{
+		GeoFeature* feature = features.at(i);
+		QList<QString> keys = feature->getAttributeMap()->keys();
+		QList<QVariant> values = feature->getAttributeMap()->values();
+		for (int j = 0; j < keys.size(); j++)
+		{
+			if (keys.at(j) == attriName)//如果是要查找的属性名
+			{
+				if (values.at(j).toString().contains(attriValue))//如果输入的属性值是要素属性值的一部分
+				{
+					featuresFound.append(feature);
+				}
+			}
+		}
+	}
+	return featuresFound;
+}
+
+QList<GeoFeature*> util::globalSearch(GeoMap * map, QString attriValue)
+{
+	QList<GeoFeature*> features;
+	for (int i = 0; i < map->size(); i++) {
+		GeoLayer* layer = map->getLayerAt(i);
+	}
+	return features;
+}
 
 GeoLayer * util::openGeoJsonByCJson(QString path)
 {

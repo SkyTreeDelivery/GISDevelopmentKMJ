@@ -175,6 +175,11 @@ void QtFunctionWidget::switchOpenrateMode(int operateMode)
 	this->operateMode = operateMode;
 }
 
+GeoMap * QtFunctionWidget::getMap()
+{
+	return map;
+}
+
 void QtFunctionWidget::changeLayer(GeoLayer* layer)
 {
 	if (isExist(layer)) {
@@ -610,7 +615,7 @@ void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 				currentLayer->selectFeature(feature);
 			}
 			else if(currentLayer->getSelectMode() == EnumType::selectMode::SINGLEMODE){
-				currentLayer->clearFeatures();
+				currentLayer->clearSelections();
 			}
 			update();
 		}

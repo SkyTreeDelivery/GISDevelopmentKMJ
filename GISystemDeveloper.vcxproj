@@ -77,6 +77,10 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">GISystemDeveloper</TargetName>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IgnoreImportLibrary>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>E:\NLPIR\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\NLPIR\win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(QTDIR)\include;release;\include;$(QTDIR)\mkspecs\win32-msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -153,7 +157,7 @@
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(Qt_LIBS_);$(QTDIR)\lib\Qt5Xmld.lib;$(QTDIR)\lib\Qt5Guid.lib;E:\gdal\lib\gdal_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(Qt_LIBS_);$(QTDIR)\lib\Qt5Xmld.lib;$(QTDIR)\lib\Qt5Guid.lib;E:\gdal\lib\gdal_i.lib;NLPIR.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>E:\gdal\lib;C:\opensslx86\lib;C:\Utils\postgresqlx86\pgsql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -187,6 +191,7 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AttributeTableWidget.cpp" />
     <ClCompile Include="cjson\cJSON.c" />
     <ClCompile Include="cjson\CJsonObject.cpp" />
     <ClCompile Include="FillSymbol.cpp" />
@@ -197,6 +202,7 @@
     <ClCompile Include="GeoPoint.cpp" />
     <ClCompile Include="GeoPolygon.cpp" />
     <ClCompile Include="GeoPolyline.cpp" />
+    <ClCompile Include="GlobalSearchWidget.cpp" />
     <ClCompile Include="gpc\gpc.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridIndex.cpp" />
@@ -219,6 +225,7 @@
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="AttributeTableWidget.h" />
     <ClInclude Include="cjson\cJSON.h" />
     <ClInclude Include="cjson\CJsonObject.hpp" />
     <ClInclude Include="EnumType.h" />
@@ -230,6 +237,7 @@
     <ClInclude Include="GeoPoint.h" />
     <ClInclude Include="GeoPolygon.h" />
     <ClInclude Include="GeoPolyline.h" />
+    <QtMoc Include="GlobalSearchWidget.h" />
     <ClInclude Include="gpc\gpc.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GridIndex.h" />
@@ -270,6 +278,8 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="AttributeTableWidget.ui" />
+    <QtUic Include="GlobalSearchWidget.ui" />
     <QtUic Include="LinewidthDialog.ui" />
     <QtUic Include="mainwindow.ui" />
     <QtUic Include="postgisDialog.ui" />

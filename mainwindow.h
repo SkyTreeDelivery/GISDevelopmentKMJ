@@ -10,6 +10,8 @@
 #include "Symbol.h"
 #include "StyleDialog.h"
 #include "SearchWidget.h"
+#include "GlobalSearchWidget.h"
+#include "AttributeTableWidget.h"
 namespace Ui {
 class MainWindow;
 }
@@ -24,6 +26,7 @@ public:
 	void addLayerInfo(GeoLayer* layer);
 private:
 	Ui::MainWindow *ui;
+	GeoMap* map;
 	QtFunctionWidget* glw;
 	QString geojson_filename;
 	QString shapefile_filename;
@@ -32,15 +35,19 @@ private:
 	QMenu *glwMenu;
 	QPlainTextEdit* outTextEdit;
 	QTreeWidget* fileTree;
-	void initRightClickMenu();
-	void initMenuBar();
 	QTreeWidgetItem* curItem;
-	QMap<QTreeWidgetItem*, GeoLayer*> itemLayerMap; 
+	QMap<QTreeWidgetItem*, GeoLayer*> itemLayerMap;
 	SearchWidget* searchWidget;
 	QTreeWidgetItem* searchWidgetOldOpenedItem;
+	AttributeTableWidget* attriTableWidget;
+	QTreeWidgetItem* attriTableOldOpenedItem;
+	GlobalSearchWidget* gsw;
 
+	void initMenuBar();
+	void initRightClickMenu();
 	void initStyleWidget(QTreeWidgetItem* newItem);
 	void initSearchWidget(QTreeWidgetItem* newItem);
+	void initAttriTable(QTreeWidgetItem* newItem);
 
 signals:
 	void addLayerSignal(GeoLayer* layer);
@@ -48,24 +55,32 @@ signals:
 	void zoomToLayerSignal(GeoLayer* layer);
 	void setSymbolSignal(Symbol* symbol);
 public slots:  //必须声明为slots才行
+	//********** fileimport ***************************** 
 	void on_importGeoJson_action_triggered();
 	void on_importShapeFile_action_triggered();
 	void on_importFileFromPostgresql_action_triggered();
 
+	//********** search ***************************** 
+	void on_globalSearch_action_triggered();
+
+	//********** filetree rightclick ***************************** 
 	void on_zoomToLayer_action_triggered();
 	void on_deleteLayer_action_triggered();
 	void on_setSLD_action_triggered();
 	void on_setStyle_action_triggered();
 	void on_identyfy_action_triggered();
 	void on_search_action_triggered();
+	void on_openAttriTable_action_triggered();
 
 	void on_fileTree_contextMenu_request(const QPoint &pos);
 	void on_glw_contextMenu_request(const QPoint &pos);
 	void on_item_changed(QTreeWidgetItem *item);
 	void on_searchWidget_closed();
+	void on_attriTableWidget_closed();
 	void on_style_Changed(GeoLayer* layer);
 	void on_selectedStatus_Changed(QList<GeoFeature*> features);
 	void on_textout_triggered(QString text);
+	void on_updateMap();
 };
 
 #endif // MAINWINDOW_H

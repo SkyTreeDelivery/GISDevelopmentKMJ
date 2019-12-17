@@ -199,27 +199,9 @@ GeoFeature * GeoLayer::identify(GeoPoint * point, GeoLayer * layer,int threshold
 	return featureFound;
 }
 
-QList<GeoFeature*> GeoLayer::search(GeoLayer * layer, QString attriName, QString attriValue)
+QList<GeoFeature*> GeoLayer::search(QString attriName, QString attriValue)
 {
-	QList<GeoFeature*>features = layer->getAllFeature();
-	QList<GeoFeature*>featuresFound;//保存找到的要素
-	for (int i = 0; i < features.size(); i++)//遍历layer上的所有要素
-	{
-		GeoFeature* feature = features.at(i);
-		QList<QString> keys = feature->getAttributeMap()->keys();
-		QList<QVariant> values = feature->getAttributeMap()->values();
-		for (int j = 0; j < keys.size(); j++)
-		{
-			if (keys.at(j) == attriName)//如果是要查找的属性名
-			{
-				if (values.at(j).toString().contains(attriValue))//如果输入的属性值是要素属性值的一部分
-				{
-					featuresFound.append(feature);
-				}
-			}
-		}
-	}
-	return featuresFound;
+	return util::search(this, attriName, attriValue);
 }
 
 QList<QString> GeoLayer::getAttriNames(GeoLayer * layer)
@@ -277,7 +259,7 @@ bool GeoLayer::hasSelected(GeoFeature * feature)
 	return false;
 }
 
-void GeoLayer::clearFeatures()
+void GeoLayer::clearSelections()
 {
 	selectedFeatures.clear();
 }
@@ -312,6 +294,16 @@ Index * GeoLayer::getIndex()
 void GeoLayer::setSpatialIndex(Index *idx)
 {
 	spatialIndex = idx;
+}
+
+QString GeoLayer::getGlobalDefaultColomn()
+{
+	return globalDefaultColomn;
+}
+
+void GeoLayer::setGelbalDefaultColomn(QString def)
+{
+	globalDefaultColomn = def;
 }
 	
 QRectF GeoLayer::getRect()

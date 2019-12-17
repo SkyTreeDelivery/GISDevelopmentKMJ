@@ -14,6 +14,7 @@
 #include"Index.h"
 #include"GridIndex.h"
 #include"QuadTree.h"
+#include "GeoMap.h"
 
 class util
 {
@@ -33,6 +34,8 @@ public:
 	static void tesselation(GeoPolygon* polygon, gpc_tristrip* tristrip);
 	static GeoLayer* openShapeFile(QString path);
 	static GeoLayer* openFileFromPostgresql(QString path, QString layername);
+	static QList<GeoFeature*> search(GeoLayer * layer, QString attriName, QString attriValue);
+	static QList<GeoFeature*> globalSearch(GeoMap * map, QString attriValue);
 };
 
 #endif // UTIL_H

@@ -22,6 +22,7 @@ public:
 	void strongUpdata(); //开放给父类使用，调用project和update，对应
 	void renderLayer(GeoLayer* layer);   //数据和renderer发生了变化的时候调用
 	void switchOpenrateMode(int operateMode);
+	GeoMap* getMap();
 
 protected:
     virtual void initializeGL() Q_DECL_OVERRIDE;

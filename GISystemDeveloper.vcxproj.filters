@@ -43,58 +43,43 @@
       <Extensions>qrc;*</Extensions>
       <ParseFiles>false</ParseFiles>
     </Filter>
+    <Filter Include="Header Files\Geo">
+      <UniqueIdentifier>{046336d3-78de-4fea-aef9-4033ccdb22c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Geo">
+      <UniqueIdentifier>{3607ac00-d015-47d8-8bdf-eba728e923f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Index">
+      <UniqueIdentifier>{63831d89-a180-4641-9ae1-b05be93f0ca9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Index">
+      <UniqueIdentifier>{f5889250-b167-402c-8eaf-abf11bee4076}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Widget">
+      <UniqueIdentifier>{3402709a-0ebe-409a-b30b-accc55f63789}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Style">
+      <UniqueIdentifier>{ee0d5041-5487-4c44-b2f9-d8ba8d9da1f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Widget">
+      <UniqueIdentifier>{b98f5113-aabe-47e4-9b93-8ce56629093b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Style">
+      <UniqueIdentifier>{29fdf0ca-8340-4c0f-9821-5eec72bfa823}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tool">
+      <UniqueIdentifier>{e2c4ab39-69d5-4c2a-ad50-fa232ca314ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tool">
+      <UniqueIdentifier>{fb2f8c3c-85ca-4ddf-b6ac-7896c759b031}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeoLayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeoMap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeoPoint.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeoPolygon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeoPolyline.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QtFunctionWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeoGeometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeoFeature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Symbol.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MarkerSymbol.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LineSymbol.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FillSymbol.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mainwindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cjson\CJsonObject.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MyRGB.cpp">
       <Filter>Generated Files</Filter>
@@ -105,85 +90,94 @@
     <ClCompile Include="gpc\gpc.cpp">
       <Filter>dependency</Filter>
     </ClCompile>
-    <ClCompile Include="LinewidthDialog.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GeoFeature.cpp">
+      <Filter>Source Files\Geo</Filter>
     </ClCompile>
-    <ClCompile Include="postgisDialog.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GeoGeometry.cpp">
+      <Filter>Source Files\Geo</Filter>
     </ClCompile>
-    <ClCompile Include="SearchWidget.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GeoLayer.cpp">
+      <Filter>Source Files\Geo</Filter>
     </ClCompile>
-    <ClCompile Include="StyleDialog.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GeoMap.cpp">
+      <Filter>Source Files\Geo</Filter>
     </ClCompile>
-    <ClCompile Include="GridIndex.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GeoPoint.cpp">
+      <Filter>Source Files\Geo</Filter>
+    </ClCompile>
+    <ClCompile Include="GeoPolygon.cpp">
+      <Filter>Source Files\Geo</Filter>
+    </ClCompile>
+    <ClCompile Include="GeoPolyline.cpp">
+      <Filter>Source Files\Geo</Filter>
     </ClCompile>
     <ClCompile Include="Grid.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Index</Filter>
     </ClCompile>
     <ClCompile Include="Index.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Index</Filter>
     </ClCompile>
-    <ClCompile Include="QuadTree.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GridIndex.cpp">
+      <Filter>Source Files\Index</Filter>
     </ClCompile>
     <ClCompile Include="QuadNode.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Index</Filter>
+    </ClCompile>
+    <ClCompile Include="QuadTree.cpp">
+      <Filter>Source Files\Index</Filter>
+    </ClCompile>
+    <ClCompile Include="mainwindow.cpp">
+      <Filter>Source Files\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="postgisDialog.cpp">
+      <Filter>Source Files\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="QtFunctionWidget.cpp">
+      <Filter>Source Files\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="SearchWidget.cpp">
+      <Filter>Source Files\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="StyleDialog.cpp">
+      <Filter>Source Files\Widget</Filter>
     </ClCompile>
     <ClCompile Include="TextOutWidget.cpp">
+      <Filter>Source Files\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="LinewidthDialog.cpp">
+      <Filter>Source Files\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>Source Files\Style</Filter>
+    </ClCompile>
+    <ClCompile Include="FillSymbol.cpp">
+      <Filter>Source Files\Style</Filter>
+    </ClCompile>
+    <ClCompile Include="LineSymbol.cpp">
+      <Filter>Source Files\Style</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerSymbol.cpp">
+      <Filter>Source Files\Style</Filter>
+    </ClCompile>
+    <ClCompile Include="cjson\CJsonObject.cpp">
+      <Filter>Source Files\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="util.cpp">
+      <Filter>Source Files\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalSearchWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AttributeTableWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GeoLayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeoMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeoPoint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeoPolygon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeoPolyline.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="QtFunctionWidget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EnumType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeoGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeoFeature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Symbol.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MarkerSymbol.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LineSymbol.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FillSymbol.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cjson\CJsonObject.hpp">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MyRGB.h">
       <Filter>Generated Files</Filter>
@@ -197,20 +191,62 @@
     <ClInclude Include="resource.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GridIndex.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="GeoFeature.h">
+      <Filter>Header Files\Geo</Filter>
     </ClInclude>
-    <ClInclude Include="Grid.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="GeoGeometry.h">
+      <Filter>Header Files\Geo</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoLayer.h">
+      <Filter>Header Files\Geo</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoMap.h">
+      <Filter>Header Files\Geo</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoPoint.h">
+      <Filter>Header Files\Geo</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoPolygon.h">
+      <Filter>Header Files\Geo</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoPolyline.h">
+      <Filter>Header Files\Geo</Filter>
     </ClInclude>
     <ClInclude Include="Index.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Index</Filter>
     </ClInclude>
-    <ClInclude Include="QuadTree.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="GridIndex.h">
+      <Filter>Header Files\Index</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>Header Files\Index</Filter>
     </ClInclude>
     <ClInclude Include="QuadNode.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Index</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadTree.h">
+      <Filter>Header Files\Index</Filter>
+    </ClInclude>
+    <ClInclude Include="QtFunctionWidget.h">
+      <Filter>Header Files\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
+      <Filter>Header Files\Style</Filter>
+    </ClInclude>
+    <ClInclude Include="FillSymbol.h">
+      <Filter>Header Files\Style</Filter>
+    </ClInclude>
+    <ClInclude Include="LineSymbol.h">
+      <Filter>Header Files\Style</Filter>
+    </ClInclude>
+    <ClInclude Include="MarkerSymbol.h">
+      <Filter>Header Files\Style</Filter>
+    </ClInclude>
+    <ClInclude Include="cjson\CJsonObject.hpp">
+      <Filter>Header Files\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>Header Files\Tool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -237,24 +273,36 @@
     <QtUic Include="TextOutWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="GlobalSearchWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="AttributeTableWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="mainwindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="LinewidthDialog.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="postgisDialog.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="SearchWidget.h">
-      <Filter>Header Files</Filter>
+    <QtMoc Include="TextOutWidget.h">
+      <Filter>Header Files\Widget</Filter>
     </QtMoc>
     <QtMoc Include="StyleDialog.h">
+      <Filter>Header Files\Widget</Filter>
+    </QtMoc>
+    <QtMoc Include="SearchWidget.h">
+      <Filter>Header Files\Widget</Filter>
+    </QtMoc>
+    <QtMoc Include="LinewidthDialog.h">
+      <Filter>Header Files\Widget</Filter>
+    </QtMoc>
+    <QtMoc Include="mainwindow.h">
+      <Filter>Header Files\Widget</Filter>
+    </QtMoc>
+    <QtMoc Include="postgisDialog.h">
+      <Filter>Header Files\Widget</Filter>
+    </QtMoc>
+    <QtMoc Include="GlobalSearchWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="TextOutWidget.h">
+    <QtMoc Include="AttributeTableWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

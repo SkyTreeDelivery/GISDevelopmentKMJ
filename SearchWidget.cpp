@@ -48,7 +48,7 @@ void SearchWidget::on_search_button_clicked()
 			ui->searchResultList->clear();
 			rowFeatureMap.clear();
 		}
-		QList<GeoFeature*> features = layer->search(layer, attriName, attriValue);
+		QList<GeoFeature*> features = layer->search(attriName, attriValue);
 		for (int i = 0; i < features.size(); i++) {
 			GeoFeature* feature = features.at(i);
 			QMap<QString, QVariant>* map = feature->getAttributeMap();

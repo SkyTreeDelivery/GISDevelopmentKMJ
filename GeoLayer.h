@@ -51,12 +51,14 @@ public:
 	void setIndex(Index* index);
 	Index* getIndex();
 	void setSpatialIndex(Index *idx);
+	QString getGlobalDefaultColomn();
+	void setGelbalDefaultColomn(QString def);
 	
 //与空间查询相关的：
 	//识别
 	GeoFeature *identify(GeoPoint *point, GeoLayer *layer, int threshold);
 	//查询
-	QList<GeoFeature*> search(GeoLayer* layer, QString attriName, QString attriValue);
+	QList<GeoFeature*> search(QString attriName, QString attriValue);
 	QList<QString> getAttriNames(GeoLayer *layer);
 
 	void setSelectionColor(QColor color);  //所有的要素使用同种色彩与线宽进行配置
@@ -65,7 +67,7 @@ public:
 	void selectFeature(GeoFeature* feature);
 	QList<GeoFeature*> getSelectedFeatures();
 	bool hasSelected(GeoFeature* feature);
-	void clearFeatures();
+	void clearSelections();
 	void moveFeatureToTop(GeoFeature* feature);
 private:
 	int type;   //一层只能添加一种数据
@@ -82,6 +84,7 @@ private:
 	//索引
 	int indexMode;//索引模式
 	Index *spatialIndex;
+	QString globalDefaultColomn;
 };
 
 #endif // GEOLAYER_H
