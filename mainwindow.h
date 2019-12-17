@@ -65,6 +65,7 @@ public slots:  //必须声明为slots才行
 	void on_searchWidget_closed();
 	void on_style_Changed(GeoLayer* layer);
 	void on_selectedStatus_Changed(QList<GeoFeature*> features);
+	void on_textout_triggered(QString text);
 };
 
 #endif // MAINWINDOW_H

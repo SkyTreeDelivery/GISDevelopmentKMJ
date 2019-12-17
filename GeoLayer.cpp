@@ -242,17 +242,24 @@ void GeoLayer::setSelectionconfiguration(QColor color, float width)
 	render->configSelection(color, width);
 }
 
+//根据不同的模式选取要素，同时将被选取的要素放到list顶部，便于最后绘制
 void GeoLayer::selectFeature(GeoFeature * feature)
 {
 	if (selectMode == EnumType::selectMode::SINGLEMODE) {
-		if (selectedFeatures.size()) {
-			selectedFeatures.clear();
+		if (features.contains(feature)) {
+			if (selectedFeatures.size()) {
+				selectedFeatures.clear();
+			}
+			selectedFeatures.push_back(feature);
+			moveFeatureToTop(feature);
 		}
-		selectedFeatures.push_back(feature);
 	}
 	else if (selectMode == EnumType::selectMode::MULTIMODE) {
-		if (!selectedFeatures.contains(feature)) {
-			selectedFeatures.push_back(feature);
+		if (features.contains(feature)) {  //判断是否为本layer要素
+			if (!selectedFeatures.contains(feature)) {
+				selectedFeatures.push_back(feature);
+				moveFeatureToTop(feature);
+			}
 		}
 	}
 }
@@ -273,6 +280,13 @@ bool GeoLayer::hasSelected(GeoFeature * feature)
 void GeoLayer::clearFeatures()
 {
 	selectedFeatures.clear();
+}
+
+void GeoLayer::moveFeatureToTop(GeoFeature * feature)
+{
+	if (features.contains(feature)) {
+		features.move(features.indexOf(feature), features.size() - 1);  //将选取的要素最后绘制，解决压盖问题
+	}
 }
 
 void GeoLayer::setIndexMode(int mode)

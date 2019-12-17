@@ -38,7 +38,7 @@ public:
         SearchWidget->resize(669, 473);
         layerNameLabel = new QLabel(SearchWidget);
         layerNameLabel->setObjectName(QString::fromUtf8("layerNameLabel"));
-        layerNameLabel->setGeometry(QRect(40, 40, 91, 20));
+        layerNameLabel->setGeometry(QRect(20, 40, 91, 20));
         searchResultList = new QListWidget(SearchWidget);
         searchResultList->setObjectName(QString::fromUtf8("searchResultList"));
         searchResultList->setGeometry(QRect(50, 120, 571, 311));
@@ -47,7 +47,7 @@ public:
         searchButton->setGeometry(QRect(510, 80, 93, 28));
         attributeValueLabel = new QLabel(SearchWidget);
         attributeValueLabel->setObjectName(QString::fromUtf8("attributeValueLabel"));
-        attributeValueLabel->setGeometry(QRect(40, 80, 121, 16));
+        attributeValueLabel->setGeometry(QRect(20, 80, 141, 16));
         attriNameComboBox = new QComboBox(SearchWidget);
         attriNameComboBox->setObjectName(QString::fromUtf8("attriNameComboBox"));
         attriNameComboBox->setGeometry(QRect(180, 40, 291, 21));

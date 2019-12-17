@@ -4,12 +4,14 @@
 #include <cmath>
 #include "util.h"
 #include <qlist.h>
+#include "TextOutWidget.h"
 
 QtFunctionWidget::QtFunctionWidget(QWidget *parent) : QOpenGLWidget (parent)
 		,hasSetRect(false), scale(0.8), hasWaH(false),currentLayer(NULL)
 {
 	map = new GeoMap;
 	setMouseTracking(true);
+	setFocusPolicy(Qt::StrongFocus);
 }
 
 QtFunctionWidget::~QtFunctionWidget(){
@@ -277,17 +279,30 @@ void QtFunctionWidget::switchLayer(QString fullpath)
 void QtFunctionWidget::switchWorldRect(GeoLayer* layer)
 {
 	if (isExist(layer)) {
-		initWorldRect(layer);
-		project();
-		update();
+		switchWorldRect(layer->getRect());
 	}
 }
 void QtFunctionWidget::switchWorldRect(QString fullpath)
 {
 	GeoLayer* layer = map->getLayerByFullpath(fullpath);
-	switchWorldRect(layer);
+	if (layer) {
+		switchWorldRect(layer);
+	}
 }
 
+void QtFunctionWidget::switchWorldRect(GeoFeature * feature)
+{
+	if (feature) {
+		switchWorldRect(feature->getGeometry()->getRect());
+	}
+}
+
+void QtFunctionWidget::switchWorldRect(QRectF rect)
+{
+	initWorldRect(rect);
+	project();
+	update();
+}
 //负责加载代价在图层，会在paintGL中被调用
 void QtFunctionWidget::loadWaitLayers()
 {
@@ -524,10 +539,28 @@ void QtFunctionWidget::on_deleteLayerData(GeoLayer* layer){
 	update();
 }
 
-void QtFunctionWidget::on_zoomToLayerRect(GeoLayer* layer)
+void QtFunctionWidget::on_zoomToLayer(GeoLayer* layer)
 {
 	switchLayer(layer);
 	switchWorldRect(layer);
+}
+
+void QtFunctionWidget::on_zoomToRect(QRectF rect)
+{
+	switchWorldRect(rect);
+}
+
+void QtFunctionWidget::on_transToRect(QRectF rect)
+{
+	refreshWorldRectForTrans(worldRect.center(), rect.center(), EnumType::scaleType::worldScale);
+	project();
+	update();
+}
+
+void QtFunctionWidget::on_selectFeature(GeoFeature * feature)
+{
+	currentLayer->selectFeature(feature);
+	update();
 }
 
 void QtFunctionWidget::on_setSymbol(Symbol * symbol)
@@ -547,18 +580,41 @@ void QtFunctionWidget::on_setSymbol(Symbol * symbol)
 	renderLayer(currentLayer);   //样式发生了变化因此重新渲染
 }
 
+void QtFunctionWidget::on_zoomToFeature(GeoFeature * feature)
+{
+	QRectF rect = feature->getGeometry()->getRect();
+	refreshWorldRectForScale(rect.center(), rect,EnumType::scaleType::worldScale);  //先缩放
+	refreshWorldRectForTrans( rect.center(), worldRect.center(), EnumType::scaleType::worldScale); //后平移
+	currentLayer->selectFeature(feature);
+	project();
+	update();
+	//switchWorldRect(feature);
+}
+
+void QtFunctionWidget::on_transToFeature(GeoFeature * feature)
+{
+	refreshWorldRectForTrans(feature->getGeometry()->getRect().center(), worldRect.center(), EnumType::scaleType::worldScale);
+	currentLayer->selectFeature(feature);
+	project();
+	update();
+}
+
 
 void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 {
-	if(e->button() == Qt::LeftButton){   //右键
+	if(e->button() == Qt::LeftButton){   //左键
 		if (operateMode == EnumType::operateMode::IDENTIFY) {
 			QPointF worldPoint = screenToWorld(e->pos());
 			GeoFeature* feature = currentLayer->identify(&GeoPoint(worldPoint), currentLayer, worldRect.width()/10);
-			currentLayer->setSelectMode(EnumType::selectMode::SINGLEMODE);
-			currentLayer->selectFeature(feature);
+			if (feature) {
+				currentLayer->selectFeature(feature);
+			}
+			else if(currentLayer->getSelectMode() == EnumType::selectMode::SINGLEMODE){
+				currentLayer->clearFeatures();
+			}
 			update();
 		}
-	}else if(e->button() == Qt::RightButton){   //左键
+	}else if(e->button() == Qt::RightButton){   //右键
 		if (operateMode == EnumType::operateMode::IDENTIFY) {
 			operateMode = EnumType::operateMode::NORMOL;
 	   }
@@ -580,7 +636,7 @@ void QtFunctionWidget::mouseMoveEvent(QMouseEvent *e)
 	}else if(e->buttons() & Qt::MidButton){   //鼠标移动并按住滚轮 ----  地图移动
 		//更新中间点坐标
 		screenPointDuring = e->pos();
-		refreshWorldRectForTrans(screenPointBegin, screenPointDuring);
+		refreshWorldRectForTrans(screenPointBegin, screenPointDuring,EnumType::scaleType::screenScale);
 		project();
 		update();
 	}
@@ -597,7 +653,7 @@ void QtFunctionWidget::mouseReleaseEvent(QMouseEvent *e)
 	else if (e->button() == Qt::MidButton) {   //滚轮单击
 		//更新结束点坐标
 		screenPointEnd = e->pos();
-		refreshWorldRectForTrans(screenPointBegin, screenPointEnd);
+		refreshWorldRectForTrans(screenPointBegin, screenPointDuring, EnumType::scaleType::screenScale);
 		project();
 		update();
 	}
@@ -606,13 +662,41 @@ void QtFunctionWidget::mouseReleaseEvent(QMouseEvent *e)
 void QtFunctionWidget::wheelEvent(QWheelEvent *e)
 {
 	if(e->delta() > 0){   //远离我，向前滚动----地图缩小
-		refreshWorldRectForScale(e->pos(), 1.0 / scale);
+		refreshWorldRectForScale(e->pos(), 1.0 / scale,EnumType::scaleType::screenScale);
 		project();
 		update();
 	}else if(e->delta() < 0) {      //靠近我，向后滚动----地图放大
-		refreshWorldRectForScale(e->pos(), scale);
+		refreshWorldRectForScale(e->pos(), scale, EnumType::scaleType::screenScale);
 		project();
 		update();
+	}
+}
+
+void QtFunctionWidget::keyPressEvent(QKeyEvent * event)
+{
+	switch (event->key())
+	{
+	case Qt::Key_Shift:
+		if (operateMode == EnumType::operateMode::IDENTIFY) {
+			currentLayer->setSelectMode(EnumType::selectMode::MULTIMODE);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void QtFunctionWidget::keyReleaseEvent(QKeyEvent * event)
+{
+	switch (event->key())
+	{
+	case Qt::Key_Shift:
+		if (operateMode == EnumType::operateMode::IDENTIFY) {
+			currentLayer->setSelectMode(EnumType::selectMode::SINGLEMODE);
+		}
+		break;
+	default:
+		break;
 	}
 }
 
@@ -699,30 +783,89 @@ void QtFunctionWidget::deleteLayer(GeoLayer * layer)
 	}
 }
 
-//平移
-void QtFunctionWidget::refreshWorldRectForTrans(QPoint begin, QPoint end)
+//平移,对worldrect施加一个从begin指向end的移动向量
+void QtFunctionWidget::refreshWorldRectForTrans(QPointF begin, QPointF end,int scaleType)
 {
-	QPointF worldPointBegin = screenToWorld(begin);
-	QPointF worldPointEnd = screenToWorld(end);
-	QPointF moveVector = worldPointEnd - worldPointBegin;
-	QPointF leftTopPoint = originWorldRect.topLeft();
-	QPointF rightBottomPoint = originWorldRect.bottomRight();
-	worldRect = QRectF(leftTopPoint - moveVector, rightBottomPoint - moveVector);
+	if (scaleType == EnumType::scaleType::screenScale) {
+		QPointF worldPointBegin = screenToWorld(begin);
+		QPointF worldPointEnd = screenToWorld(end);
+		QPointF moveVector = worldPointEnd - worldPointBegin;
+		QPointF leftTopPoint = originWorldRect.topLeft();
+		QPointF rightBottomPoint = originWorldRect.bottomRight();
+		worldRect = QRectF(leftTopPoint - moveVector, rightBottomPoint - moveVector);
+	}
+	else if (scaleType == EnumType::scaleType::worldScale) {
+		QPointF moveVector = end - begin;
+		QPointF leftTopPoint = worldRect.topLeft();
+		QPointF rightBottomPoint = worldRect.bottomRight();
+		worldRect = QRectF(leftTopPoint - moveVector, rightBottomPoint - moveVector);
+	}
 }
 
-//缩放
-void QtFunctionWidget::refreshWorldRectForScale(QPoint originScreen, float scale)
+//缩放，注意根据缩放的思想，距离边线越长的边，其移动的速度越快
+void QtFunctionWidget::refreshWorldRectForScale(QPointF origin, float scale, int scaleType)
 {
-	QPointF originWorld = screenToWorld(originScreen);
-	QPointF leftTop = worldRect.topLeft();
-	QPointF rightBottom = worldRect.bottomRight();
-	QPointF newLeftTop = (leftTop - originWorld)*scale + originWorld;
-	QPointF newRightBottom = (rightBottom - originWorld)*scale + originWorld;
-	worldRect = QRectF(newLeftTop, newRightBottom);
+	if (scaleType == EnumType::scaleType::screenScale) {
+		QPointF originWorld = screenToWorld(origin);
+		QPointF leftTop = worldRect.topLeft();
+		QPointF rightBottom = worldRect.bottomRight();
+		QPointF newLeftTop = (leftTop - originWorld)*scale + originWorld;
+		QPointF newRightBottom = (rightBottom - originWorld)*scale + originWorld;
+		worldRect = QRectF(newLeftTop, newRightBottom);
+	}
+	else if (scaleType == EnumType::scaleType::worldScale) {
+		QPointF leftTop = worldRect.topLeft();
+		QPointF rightBottom = worldRect.bottomRight();
+		QPointF newLeftTop = (leftTop - origin)*scale + origin;
+		QPointF newRightBottom = (rightBottom - origin)*scale + origin;
+		worldRect = QRectF(newLeftTop, newRightBottom);
+	}
+}
+
+void QtFunctionWidget::refreshWorldRectForScale(QPointF origin, QRectF rect, int scaleType)
+{
+	if (scaleType == EnumType::scaleType::screenScale) {
+		float scale = 0.0;
+		float targetRadio = rect.width() / rect.height();
+		float worldRadio = worldRect.width()/ worldRect.height();
+		//根据横纵比获取scale
+		if (abs(targetRadio) > abs(worldRadio)) {
+			scale = rect.width() / worldRect.width();
+		}
+		else {
+			scale = rect.height() / worldRect.height();
+		}
+
+		QPointF originWorld = screenToWorld(origin);
+		QPointF leftTop = worldRect.topLeft();
+		QPointF rightBottom = worldRect.bottomRight();
+		QPointF newLeftTop = (leftTop - originWorld)*scale + originWorld;
+		QPointF newRightBottom = (rightBottom - originWorld)*scale + originWorld;
+		worldRect = QRectF(newLeftTop, newRightBottom);
+	}
+	else if (scaleType == EnumType::scaleType::worldScale) {
+		float scale = 0.0;
+		float targetRadio = rect.width() / rect.height();
+		float worldRadio = worldRect.width() / worldRect.height();
+		//根据横纵比获取scale
+		if (abs(targetRadio) > abs(worldRadio)) {
+			scale = rect.width() / worldRect.width();
+		}
+		else {
+			scale = rect.height() / worldRect.height();
+		}
+
+		QPointF leftTop = worldRect.topLeft();
+		QPointF rightBottom = worldRect.bottomRight();
+
+		QPointF newLeftTop = (leftTop - origin)*scale + origin;
+		QPointF newRightBottom = (rightBottom - origin)*scale + origin;
+		worldRect = QRectF(newLeftTop, newRightBottom);
+	}
 }
 
 
-QPointF QtFunctionWidget::screenToWorld(QPoint screenPoint)
+QPointF QtFunctionWidget::screenToWorld(QPointF screenPoint)
 {
 	QPointF normalizedPoint = screenToNormalizedPos(screenPoint);
 	QVector4D normalizedPoint4D(normalizedPoint);
@@ -731,7 +874,7 @@ QPointF QtFunctionWidget::screenToWorld(QPoint screenPoint)
 	return worldPoint4D.toPointF() + worldCenter;
 }
 
-QPointF QtFunctionWidget::screenToNormalizedPos(QPoint screenPoint)
+QPointF QtFunctionWidget::screenToNormalizedPos(QPointF screenPoint)
 {
 	QPointF normalizedPoint;
 	double w = this->width() * 1.0;
@@ -745,12 +888,11 @@ QPointF QtFunctionWidget::screenToNormalizedPos(QPoint screenPoint)
 	return normalizedPoint;
 }
 
-void QtFunctionWidget::initWorldRect(GeoLayer* layer)
+void QtFunctionWidget::initWorldRect(QRectF rect)
 {
-	QRectF layerRect = layer->getRect();
-	QPointF center = layerRect.center();
-	int layerWidth = layerRect.width();
-	int layerHeight = layerRect.height();
+	QPointF center = rect.center();
+	float layerWidth = rect.width();
+	float layerHeight = rect.height();
 	float layerRadio = layerWidth * 1.0 / layerHeight;
 	float viewRadio = width() * 1.0 / height();
 
@@ -761,8 +903,8 @@ void QtFunctionWidget::initWorldRect(GeoLayer* layer)
 	else {
 		layerWidth = abs(layerHeight*viewRadio);
 	}
-	QPoint leftTop(center.x() - layerWidth * 1.0 / 2, center.y() - layerHeight * 1.0 / 2);
-	worldRect = QRect(leftTop, QSize(layerWidth, layerHeight));
+	QPointF leftTop(center.x() - layerWidth * 1.0 / 2, center.y() - layerHeight * 1.0 / 2);
+	worldRect = QRectF(leftTop, QSize(layerWidth, layerHeight));
 }
 
 //TODO 判断resize的拉伸方向

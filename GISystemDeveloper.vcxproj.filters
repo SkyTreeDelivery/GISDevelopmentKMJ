@@ -132,6 +132,9 @@
     <ClCompile Include="QuadNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextOutWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeoLayer.h">
@@ -231,6 +234,9 @@
     <QtUic Include="SearchWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="TextOutWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mainwindow.h">
@@ -246,6 +252,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="StyleDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TextOutWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

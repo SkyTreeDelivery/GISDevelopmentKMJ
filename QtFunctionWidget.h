@@ -10,6 +10,7 @@
 #include "GeoLayer.h"
 #include <QMouseEvent>
 #include <qstring.h>
+#include <qplaintextedit.h>
 
 class QtFunctionWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -63,8 +64,10 @@ private:
 	void initLayer(QString fullpath);
 	void switchLayer(GeoLayer* layer);    //切换current图层，不执行重绘
 	void switchLayer(QString fullpath);
-	void switchWorldRect(GeoLayer* layer);		//切换绘制区域，执行重绘
+	void switchWorldRect(GeoLayer* layer);
 	void switchWorldRect(QString fullpath);
+	void switchWorldRect(GeoFeature* feature);
+	void switchWorldRect(QRectF rect);		//切换绘制区域，执行重绘
    //------------------------------------------------------------------------
 
 	void setDefaultRenderColor(Render* render,int type);
@@ -73,11 +76,12 @@ private:
 	void bindVaos(GeoLayer* layer);
 	void project();   //使用世界窗口进行投影
 	void loadWaitLayers();
-	void refreshWorldRectForTrans(QPoint begin, QPoint end);
-	void refreshWorldRectForScale(QPoint originScreen, float scale);
-	QPointF screenToWorld(QPoint screenPoint);
-	QPointF screenToNormalizedPos(QPoint screenPoint);
-	void initWorldRect(GeoLayer* layer);  //初始化layer的世界窗口大小，保证zoom的图层在屏幕中央
+	void refreshWorldRectForTrans(QPointF begin, QPointF end,int scaleType);
+	void refreshWorldRectForScale(QPointF originScreen, float scale, int scaleType);
+	void refreshWorldRectForScale(QPointF originScreen, QRectF rect, int scaleType);
+	QPointF screenToWorld(QPointF screenPoint);
+	QPointF screenToNormalizedPos(QPointF screenPoint);
+	void initWorldRect(QRectF rect);  //初始化世界窗口大小，保证zoom的rect在屏幕中央
 	int getResizeDirection(QRect oriRect,QRect newRect);
 
 	void mousePressEvent(QMouseEvent *event);
@@ -85,10 +89,18 @@ private:
 	void mouseReleaseEvent(QMouseEvent *event);
 	void wheelEvent(QWheelEvent *event);
 
+	void keyPressEvent(QKeyEvent *event);
+	void keyReleaseEvent(QKeyEvent *event);
+
 public slots:
 	void on_addLayerData(GeoLayer* layer);
 	void on_deleteLayerData(GeoLayer* layer);
-	void on_zoomToLayerRect(GeoLayer* layer);
+	void on_zoomToLayer(GeoLayer* layer);
 	void on_setSymbol(Symbol* symbol);
+	void on_zoomToFeature(GeoFeature* feature);
+	void on_transToFeature(GeoFeature* feature);
+	void on_zoomToRect(QRectF rect);
+	void on_transToRect(QRectF rect);
+	void on_selectFeature(GeoFeature* feature);
 };
 

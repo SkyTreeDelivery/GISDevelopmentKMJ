@@ -50,6 +50,7 @@ public:
 	int getIndexMode();
 	void setIndex(Index* index);
 	Index* getIndex();
+	void setSpatialIndex(Index *idx);
 	
 //与空间查询相关的：
 	//识别
@@ -57,10 +58,7 @@ public:
 	//查询
 	QList<GeoFeature*> search(GeoLayer* layer, QString attriName, QString attriValue);
 	QList<QString> getAttriNames(GeoLayer *layer);
-    //获取和添加索引类型
-	//添加索引
-	void setSpatialIndex(Index *idx);
-	
+
 	void setSelectionColor(QColor color);  //所有的要素使用同种色彩与线宽进行配置
 	void setSelectionWidth(float width);
 	void setSelectionconfiguration(QColor color,float width);
@@ -68,6 +66,7 @@ public:
 	QList<GeoFeature*> getSelectedFeatures();
 	bool hasSelected(GeoFeature* feature);
 	void clearFeatures();
+	void moveFeatureToTop(GeoFeature* feature);
 private:
 	int type;   //一层只能添加一种数据
     QList<GeoFeature*> features;

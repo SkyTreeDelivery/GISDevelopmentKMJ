@@ -16,7 +16,7 @@
   <widget class="QLabel" name="layerNameLabel">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>20</x>
      <y>40</y>
      <width>91</width>
      <height>20</height>
@@ -52,9 +52,9 @@
   <widget class="QLabel" name="attributeValueLabel">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>20</x>
      <y>80</y>
-     <width>121</width>
+     <width>141</width>
      <height>16</height>
     </rect>
    </property>

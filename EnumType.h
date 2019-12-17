@@ -14,5 +14,6 @@ public:
 	enum dataChangedType {NOCHANGEDATA,SPATICALDATA,COLORDATA};
 	enum indexMode { GRIDINDEX, QUADTREE, R };//网格索引、四叉树索引、R+索引
 	enum quadTree { TOPRIGHT, BOTTOMRIGHT, BOTTOMLEFT, TOPLEFT };//四叉树的四个象限
+	enum scaleType {screenScale ,worldScale ,normalizeScale};
 };
 
