@@ -192,8 +192,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AttributeTableWidget.cpp" />
+    <ClCompile Include="CGeoKernalDensTool.cpp" />
     <ClCompile Include="cjson\cJSON.c" />
     <ClCompile Include="cjson\CJsonObject.cpp" />
+    <ClCompile Include="COption.cpp" />
     <ClCompile Include="FillSymbol.cpp" />
     <ClCompile Include="GeoFeature.cpp" />
     <ClCompile Include="GeoLayer.cpp" />
@@ -202,11 +204,13 @@
     <ClCompile Include="GeoPoint.cpp" />
     <ClCompile Include="GeoPolygon.cpp" />
     <ClCompile Include="GeoPolyline.cpp" />
+    <ClCompile Include="GeoTool.cpp" />
     <ClCompile Include="GlobalSearchWidget.cpp" />
     <ClCompile Include="gpc\gpc.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridIndex.cpp" />
     <ClCompile Include="Index.cpp" />
+    <ClCompile Include="kernalDensity.cpp" />
     <ClCompile Include="LineSymbol.cpp" />
     <ClCompile Include="LinewidthDialog.cpp" />
     <ClCompile Include="mainwindow.cpp" />
@@ -227,8 +231,10 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="AttributeTableWidget.h" />
+    <ClInclude Include="CGeoKernalDensTool.h" />
     <ClInclude Include="cjson\cJSON.h" />
     <ClInclude Include="cjson\CJsonObject.hpp" />
+    <ClInclude Include="COption.h" />
     <ClInclude Include="EnumType.h" />
     <ClInclude Include="FillSymbol.h" />
     <ClInclude Include="GeoFeature.h" />
@@ -239,10 +245,12 @@
     <ClInclude Include="GeoPolygon.h" />
     <ClInclude Include="GeoPolyline.h" />
     <QtMoc Include="GlobalSearchWidget.h" />
+    <ClInclude Include="GeoTool.h" />
     <ClInclude Include="gpc\gpc.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GridIndex.h" />
     <ClInclude Include="Index.h" />
+    <QtMoc Include="kernalDensity.h" />
     <ClInclude Include="LineSymbol.h" />
     <QtMoc Include="mainwindow.h" />
     <QtMoc Include="LinewidthDialog.h" />
@@ -282,6 +290,7 @@
   <ItemGroup>
     <QtUic Include="AttributeTableWidget.ui" />
     <QtUic Include="GlobalSearchWidget.ui" />
+    <QtUic Include="kernaldensity.ui" />
     <QtUic Include="LinewidthDialog.ui" />
     <QtUic Include="mainwindow.ui" />
     <QtUic Include="postgisDialog.ui" />

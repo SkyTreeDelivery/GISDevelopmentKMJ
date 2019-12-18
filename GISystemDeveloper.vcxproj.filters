@@ -171,8 +171,20 @@
     <ClCompile Include="GlobalSearchWidget.cpp">
       <Filter>Source Files\Widget</Filter>
     </ClCompile>
+    <ClCompile Include="CGeoKernalDensTool.cpp">
+      <Filter>Source Files\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="COption.cpp">
+      <Filter>Source Files\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="kernalDensity.cpp">
+      <Filter>Source Files\Widget</Filter>
+    </ClCompile>
     <ClCompile Include="ToolWidget.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="GeoTool.cpp">
+      <Filter>Source Files\Widget</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -251,6 +263,15 @@
     <ClInclude Include="util.h">
       <Filter>Header Files\Tool</Filter>
     </ClInclude>
+    <ClInclude Include="CGeoKernalDensTool.h">
+      <Filter>Header Files\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="COption.h">
+      <Filter>Header Files\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoTool.h">
+      <Filter>Header Files\Tool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -285,6 +306,9 @@
     <QtUic Include="ToolWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="kernaldensity.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TextOutWidget.h">
@@ -311,8 +335,11 @@
     <QtMoc Include="GlobalSearchWidget.h">
       <Filter>Header Files\Widget</Filter>
     </QtMoc>
+    <QtMoc Include="kernalDensity.h">
+      <Filter>Header Files\Widget</Filter>
+    </QtMoc>
     <QtMoc Include="ToolWidget.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Widget</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

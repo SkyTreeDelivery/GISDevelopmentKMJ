@@ -5,8 +5,8 @@
 #include <EnumType.h>
 #include <qheaderview.h>
 
-ToolWidget::ToolWidget(QWidget *parent)
-	: QWidget(parent), toolTree(NULL)
+ToolWidget::ToolWidget(GeoMap* map, QWidget *parent)
+	: QWidget(parent), toolTree(NULL),map(map)
 {
 	ui = new Ui::ToolWidget();
 	ui->setupUi(this);
@@ -43,7 +43,7 @@ void ToolWidget::on_item_clicked(QTreeWidgetItem* item)
 {
 	int toolType = item->data(0, Qt::WhatsThisRole).toInt();
 	if (toolType == EnumType::sparitalAnalysisTool::NUCLEAR_DENSITY_ANALYSIS) { //核密度
-
+		
 	}
 	else if (toolType == EnumType::sparitalAnalysisTool::ACCESSIBILITY_ANALYSIS) { //可达性
 
