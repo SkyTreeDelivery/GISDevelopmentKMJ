@@ -2,10 +2,10 @@
 #include "EnumType.h"
 #include "util.h"
 
-GeoLayer::GeoLayer():render(NULL),visibility(true)
+GeoLayer::GeoLayer():render(NULL),visibility(true), selectMode(EnumType::selectMode::SINGLEMODE),
+dataChangeType(EnumType::dataChangedType::NOCHANGEDATA)
 {
 	type = -1;
-	indexMode = EnumType::QUADTREE;//layer默认创建网格索引
 }
 
 GeoLayer::~GeoLayer()
@@ -103,25 +103,15 @@ QString GeoLayer::getTypeString()
 
 //由于QTCreater不是采用定时编译，也就不能实时地告知编写错误，也不能对没有编译的变量进行提示，如果想要自动提示新添加的变量，就需要进行一次编译
 
-void GeoLayer::draw()
-{
-
-}
-
-bool GeoLayer::isWaitingRendered()
-{
-	return this->waitingRendered;
-}
-
-void GeoLayer::setWaitingRendered(bool b)
-{
-	this->waitingRendered = b;
-}
-
 void GeoLayer::bindDefaultRender()
 {
+	if (render) {
+		delete render;
+	}
 	Render* render = new Render();
 	LineSymbol* lineSymbol = new LineSymbol();
+	LineSymbol* markerOutlineSymbol = new LineSymbol();
+	LineSymbol* fillOutlineSymbol = new LineSymbol();
 	MarkerSymbol* markerSymbol = new MarkerSymbol();
 	FillSymbol* fillSymbol = new FillSymbol();
 	QColor black;
@@ -134,11 +124,15 @@ void GeoLayer::bindDefaultRender()
 	EEEEEE.setNamedColor("#EEEEEE");
 	lineSymbol->setWidth(1);
 	lineSymbol->setColor(black);
+	markerOutlineSymbol->setWidth(1);
+	markerOutlineSymbol->setColor(black);
+	fillOutlineSymbol->setWidth(1);
+	fillOutlineSymbol->setColor(black);
 	markerSymbol->setColor(yellow);
 	markerSymbol->setSize(1);
-	markerSymbol->setOutline(lineSymbol);
+	markerSymbol->setOutline(markerOutlineSymbol);
 	fillSymbol->setColor(EEEEEE);
-	fillSymbol->setOutline(lineSymbol);
+	fillSymbol->setOutline(fillOutlineSymbol);
 
 	render->setMarkerSymbol(markerSymbol);
 	render->setFillSymbol(fillSymbol);
@@ -161,6 +155,36 @@ QString GeoLayer::getSourceName()
 	if (this->source == EnumType::source::GEOJSON) return "GeoJson";
 	else if (this->source == EnumType::source::SHAPEFILE) return "ShapeFile";
 	else if (this->source == EnumType::source::POSTGRESQL) return "PostgreSql";
+}
+
+void GeoLayer::setAttributeNames(QList<QString> names)
+{
+	layerAttributeNames = names;
+}
+
+QList<QString> GeoLayer::getAttributeNames()
+{
+	return layerAttributeNames;
+}
+
+void GeoLayer::setSelectMode(int mode)
+{
+	this->selectMode = mode;
+}
+
+int GeoLayer::getSelectMode()
+{
+	return selectMode;
+}
+
+void GeoLayer::setDataChangedType(int type)
+{
+	dataChangeType = type;
+}
+
+int GeoLayer::getDataChangedType()
+{
+	return dataChangeType;
 }
 
 GeoFeature * GeoLayer::Identify(GeoPoint * point, GeoLayer * layer,int threshold)
@@ -196,10 +220,57 @@ QList<GeoFeature*> GeoLayer::search(GeoLayer * layer, QString attriName, QString
 	return featuresFound;
 }
 
-QList<QString> GeoLayer::getAttriNames()
+QList<QString> GeoLayer::getAttriNames(GeoLayer * layer)
 {
-	QVariantMap *variantMap=this->getFeatureAt(0)->getAttributeMap();
-	return variantMap->keys();
+	return QList<QString>();
+}
+
+void GeoLayer::setSelectionColor(QColor color)
+{
+	render->configSelection(color);
+}
+
+void GeoLayer::setSelectionWidth(float width)
+{
+	render->configSelection(width);
+}
+
+void GeoLayer::setSelectionconfiguration(QColor color, float width)
+{
+	render->configSelection(color, width);
+}
+
+void GeoLayer::selectFeature(GeoFeature * feature)
+{
+	if (selectMode == EnumType::selectMode::SINGLEMODE) {
+		if (selectedFeatures.size()) {
+			selectedFeatures.clear();
+		}
+		selectedFeatures.push_back(feature);
+	}
+	else if (selectMode == EnumType::selectMode::MULTIMODE) {
+		if (!selectedFeatures.contains(feature)) {
+			selectedFeatures.push_back(feature);
+		}
+	}
+}
+
+QList<GeoFeature*> GeoLayer::getSelectedFeatures()
+{
+	return selectedFeatures;
+}
+
+bool GeoLayer::hasSelected(GeoFeature * feature)
+{
+	if (selectedFeatures.contains(feature)) {
+		return true;
+	}
+	return false;
+}
+
+void GeoLayer::clearFeatures()
+{
+	selectedFeatures.clear();
 }
 
 void GeoLayer::setIndexMode(int mode)

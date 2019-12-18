@@ -7,7 +7,6 @@ LineSymbol::LineSymbol()
 	this->type = EnumType::LINESYMBOL;
 }
 
-
 LineSymbol::~LineSymbol()
 {
 }

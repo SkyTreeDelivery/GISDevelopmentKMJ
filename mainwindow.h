@@ -8,7 +8,8 @@
 #include <qplaintextedit.h>
 #include "QtFunctionWidget.h"
 #include "Symbol.h"
-#include "StyleWidget.h"
+#include "StyleDialog.h"
+#include "SearchWidget.h"
 namespace Ui {
 class MainWindow;
 }
@@ -35,10 +36,11 @@ private:
 	void initMenuBar();
 	QTreeWidgetItem* curItem;
 	QMap<QTreeWidgetItem*, GeoLayer*> itemLayerMap; 
-	StyleWidget* sw;
-	QTreeWidgetItem* oldOpenedItem;
+	SearchWidget* searchWidget;
+	QTreeWidgetItem* searchWidgetOldOpenedItem;
 
 	void initStyleWidget(QTreeWidgetItem* newItem);
+	void initSearchWidget(QTreeWidgetItem* newItem);
 
 signals:
 	void addLayerSignal(GeoLayer* layer);
@@ -54,12 +56,15 @@ public slots:  //必须声明为slots才行
 	void on_deleteLayer_action_triggered();
 	void on_setSLD_action_triggered();
 	void on_setStyle_action_triggered();
+	void on_identyfy_action_triggered();
+	void on_search_action_triggered();
 
 	void on_fileTree_contextMenu_request(const QPoint &pos);
 	void on_glw_contextMenu_request(const QPoint &pos);
 	void on_item_changed(QTreeWidgetItem *item);
-	void on_styleWidget_closed();
+	void on_searchWidget_closed();
 	void on_style_Changed(GeoLayer* layer);
+	void on_selectedStatus_Changed(QList<GeoFeature*> features);
 };
 
 #endif // MAINWINDOW_H
