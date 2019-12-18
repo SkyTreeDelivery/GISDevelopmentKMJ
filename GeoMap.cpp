@@ -72,3 +72,10 @@ int GeoMap::size()
 {
 	return layers.size();
 }
+
+void GeoMap::moveLayerLevel(int from, int to)
+{
+	if (from >= 0 && from < layers.size() && to >= 0 && to < layers.size()) {
+		layers.move(from, to);
+	}
+}

@@ -26,6 +26,7 @@ public:
 	void switchOpenrateMode(int operateMode);
 	void setHasTableShowing(bool flag);
 	GeoMap* getMap();
+	void moveLayerLevel(int from, int to);
 
 protected:
     virtual void initializeGL() Q_DECL_OVERRIDE;

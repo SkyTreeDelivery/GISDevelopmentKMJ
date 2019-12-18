@@ -77,6 +77,11 @@ public slots:  //必须声明为slots才行
 	void on_search_action_triggered();
 	void on_openAttriTable_action_triggered();
 
+	void on_upwardOneLevel_action_triggered();
+	void on_downwardOneLevel_action_triggered();
+	void on_upwardToTop_action_triggered();
+	void on_downwardToBottom_action_triggered();
+
 	void on_fileTree_contextMenu_request(const QPoint &pos);
 	void on_glw_contextMenu_request(const QPoint &pos);
 	void on_item_changed(QTreeWidgetItem *item);

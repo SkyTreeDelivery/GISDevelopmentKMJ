@@ -17,6 +17,7 @@ public:
 	int getIdx(GeoLayer* layer);
 	void removeByFullpath(QString fullpath);
 	int size();
+	void moveLayerLevel(int from, int to);
 
 private:
     QList<GeoLayer*> layers;

@@ -88,7 +88,7 @@ void QtFunctionWidget::paintGL(){
     shaderProgram.bind();
     {
 		qDebug() << "........................................";
-		for(int j = 0; j < map->size();j++){
+		for(int j = 0; j < map->size();j++){   //从map的第一个layer向后绘制，认为第一个为最底层
 			GeoLayer* layer = map->getLayerAt(j);
 			if(layer->isVisable()){
 				int type = layer->getType();
@@ -179,6 +179,11 @@ void QtFunctionWidget::switchOpenrateMode(int operateMode)
 GeoMap * QtFunctionWidget::getMap()
 {
 	return map;
+}
+
+void QtFunctionWidget::moveLayerLevel(int from, int to)
+{
+	map->moveLayerLevel(from, to);
 }
 
 void QtFunctionWidget::changeLayer(GeoLayer* layer)
