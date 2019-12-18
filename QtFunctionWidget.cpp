@@ -560,7 +560,7 @@ void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 	}else if(e->button() == Qt::RightButton){   //×ó¼ü
 		if (operateMode == EnumType::operateMode::IDENTIFY) {
 			operateMode = EnumType::operateMode::NORMOL;
-	   }
+	    }
 	}else if(e->button() == Qt::MidButton){   //¹öÂÖµ¥»÷
 		//³õÊ¼»¯
 		screenPointBegin = e->pos();

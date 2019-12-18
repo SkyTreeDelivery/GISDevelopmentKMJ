@@ -220,9 +220,9 @@ QList<GeoFeature*> GeoLayer::search(GeoLayer * layer, QString attriName, QString
 	return featuresFound;
 }
 
-QList<QString> GeoLayer::getAttriNames(GeoLayer * layer)
+QList<QString> GeoLayer::getAttriNames()
 {
-	return QList<QString>();
+	return layerAttributeNames;
 }
 
 void GeoLayer::setSelectionColor(QColor color)

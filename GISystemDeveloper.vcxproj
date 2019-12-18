@@ -373,6 +373,8 @@
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SearchWidget.cpp" />
+    <ClCompile Include="StyleDialog.cpp" />
     <ClCompile Include="StyleWidget.cpp" />
     <ClCompile Include="Symbol.cpp" />
     <ClCompile Include="util.cpp" />
@@ -409,6 +411,8 @@
     <ClInclude Include="Render.h" />
     <QtMoc Include="StyleWidget.h" />
     <ClInclude Include="resource.h" />
+    <QtMoc Include="StyleDialog.h" />
+    <QtMoc Include="SearchWidget.h" />
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
@@ -445,6 +449,7 @@
     <QtUic Include="LinewidthDialog.ui" />
     <QtUic Include="mainwindow.ui" />
     <QtUic Include="postgisDialog.ui" />
+    <QtUic Include="SearchWidget.ui" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GISystemDeveloper.rc" />
