@@ -4,9 +4,12 @@
 #include <qtreewidget.h>
 #include <EnumType.h>
 #include <qheaderview.h>
+#include "kernalDensity.h"
+#include "AccessibilityAnalysisTool.h"
+#include "AccessAnalysisWidget.h"
 
 ToolWidget::ToolWidget(GeoMap* map, QWidget *parent)
-	: QWidget(parent), toolTree(NULL),map(map)
+	: QWidget(parent), toolTree(NULL),map(map), aaw(NULL)
 {
 	ui = new Ui::ToolWidget();
 	ui->setupUi(this);
@@ -39,13 +42,26 @@ void ToolWidget::initToolTree()
 	toolTree->expandAll();  //必须在之后调用
 }
 
+
 void ToolWidget::on_item_clicked(QTreeWidgetItem* item)
 {
 	int toolType = item->data(0, Qt::WhatsThisRole).toInt();
 	if (toolType == EnumType::sparitalAnalysisTool::NUCLEAR_DENSITY_ANALYSIS) { //核密度
-		
-	}
-	else if (toolType == EnumType::sparitalAnalysisTool::ACCESSIBILITY_ANALYSIS) { //可达性
 
 	}
+	else if (toolType == EnumType::sparitalAnalysisTool::ACCESSIBILITY_ANALYSIS) { //可达性
+		initAccessibilityAnalysisWidget();
+	}
 }
+
+void ToolWidget::initAccessibilityAnalysisWidget()
+{
+	if (!aaw) {
+		aaw = new AccessAnalysisWidget(map);
+	}
+	aaw->initWidget();
+	aaw->show();
+}
+
+
+

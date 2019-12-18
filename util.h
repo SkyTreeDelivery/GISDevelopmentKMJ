@@ -23,6 +23,8 @@ public:
     static  QString util::openFileDialog(QWidget* widget, QString curPath);
     static GeoLayer* openGeoJson(QString path);
 	static GeoLayer* openGeoJsonByCJson(QString path);
+	static GeoLayer* openShapeFile(QString path);
+	static GeoLayer* openFileFromPostgresql(QString path, QString layername);
 	static MarkerSymbol* parseSLD_Marker(QString path);
 	static LineSymbol* parseSLD_Line(QString path);
 	static FillSymbol* parseSLD_Fill(QString path);
@@ -32,8 +34,6 @@ public:
 	//static QByteArray setDefaultAlpha(QByteArray color);
 	static QColor parseColor(QString hexNamedColor);  //使用qcolor方便很多，不用自己解析了
 	static void tesselation(GeoPolygon* polygon, gpc_tristrip* tristrip);
-	static GeoLayer* openShapeFile(QString path);
-	static GeoLayer* openFileFromPostgresql(QString path, QString layername);
 	static QList<GeoFeature*> search(GeoLayer * layer, QString attriName, QString attriValue);
 	static QList<GeoFeature*> globalSearch(GeoMap * map, QString attriValue);
 };

@@ -12,7 +12,9 @@ PostgisDialog::PostgisDialog(QWidget *parent) :
     ui->ePassword->setEchoMode(QLineEdit::Password);
     ui->eUsername->setText("postgres");
     ui->eServerHost->setText("localhost");
-    ui->eServerHost1->setText("5433");
+	ui->ePassword->setText("zhang002508");
+    ui->eServerHost1->setText("5432");
+	ui->eDatabase->setText("postgis_25_sample");
 }
 
 PostgisDialog::~PostgisDialog()
@@ -47,7 +49,7 @@ QString PostgisDialog::getDatabase()
 
 QString PostgisDialog::getLayername()
 {
-    return selectedLayer;
+    return ui->comeLayername->currentText();
 }
 
 QString PostgisDialog::getPath()

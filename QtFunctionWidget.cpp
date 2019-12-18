@@ -51,6 +51,7 @@ void QtFunctionWidget::initializeGL(){
     if(!success) {
         qDebug() << "shaderProgram link failed!" << shaderProgram.log();
     }
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);  //必须先设置为enable才能设置点的size，是个坑
 }
 
 void QtFunctionWidget::resizeGL(int w, int h){
@@ -93,7 +94,7 @@ void QtFunctionWidget::paintGL(){
 				int type = layer->getType();
 				Render* render = layer->getRender();
 				//配置线宽
-				if (type == EnumType::POINT) { glLineWidth(render->getMarkerSymbol()->getOutline()->getWidth()); }
+				if (type == EnumType::POINT) { shaderProgram.setUniformValue("size", render->getMarkerSymbol()->getSize()); } //暂时无效，glPointSize无法使用
 				else if (type == EnumType::POLYLINE) { glLineWidth(render->getLineSymbol()->getWidth()); }
 				else if (type = EnumType::POLYGON) { glLineWidth(render->getFillSymbol()->getOutline()->getWidth()); }
 				if (layer->size() && featureVaosMap.size()) {
@@ -120,13 +121,13 @@ void QtFunctionWidget::paintGL(){
 								switch (vao->property("renderType").toInt())
 								{
 								case EnumType::renderType::MARKER_FILL:
-									glDrawArrays(GL_POINT, 0, layer->getFeatureAt(m)->getGeometry()->size());
+									glDrawArrays(GL_POINTS, 0, layer->getFeatureAt(m)->getGeometry()->size());
 									break;
 								case EnumType::renderType::MARKER_LINE:
 									glDrawArrays(GL_LINE_LOOP, 0, layer->getFeatureAt(m)->getGeometry()->size());
 									break;
 								case EnumType::renderType::LINE_LINE:
-									glDrawArrays(GL_LINE_LOOP, 0, layer->getFeatureAt(m)->getGeometry()->size());
+									glDrawArrays(GL_LINE_STRIP, 0, layer->getFeatureAt(m)->getGeometry()->size());
 									break;
 								case EnumType::renderType::FILL_LINE:
 									glDrawArrays(GL_LINE_LOOP, 0, layer->getFeatureAt(m)->getGeometry()->size());

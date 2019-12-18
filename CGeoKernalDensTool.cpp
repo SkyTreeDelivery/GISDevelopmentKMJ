@@ -11,23 +11,23 @@ CGeoKernalDensTool::~CGeoKernalDensTool()
 {
 }
 
-int CGeoKernalDensTool::run_tool()
+GeoLayer* CGeoKernalDensTool::run_tool()
 {
-		//根据用户的输入获得所有参数
-		QList<GeoPoint*>points = getGeoPoints(layer);
-		QRectF layerRect = layer->getRect();
-		QList<float> populations = getPopulations(points, layer);
-		QString output_file = option->output_file;
-		float output_cell_size = getCellSize(layerRect);
-		float search_radius = getSearchRadius(points, populations, layerRect);
-		int area_unit = option->area_unit;
-		int method = option->method_type;
-		//调用核密度分析函数进行分析
-		float **KDResult = KernelDensity(points, populations, output_cell_size,
-			search_radius, area_unit, method, layerRect);
-		//写入分析结果
-		saveResult(output_file, KDResult, layerRect, output_cell_size);
-	return 0;
+	//根据用户的输入获得所有参数
+	QList<GeoPoint*>points = getGeoPoints(layer);
+	QRectF layerRect = layer->getRect();
+	QList<float> populations = getPopulations(points, layer);
+	QString output_file = option->output_file;
+	float output_cell_size = getCellSize(layerRect);
+	float search_radius = getSearchRadius(points, populations, layerRect);
+	int area_unit = option->area_unit;
+	int method = option->method_type;
+	//调用核密度分析函数进行分析
+	float **KDResult = KernelDensity(points, populations, output_cell_size,
+		search_radius, area_unit, method, layerRect);
+	//写入分析结果
+	saveResult(output_file, KDResult, layerRect, output_cell_size);
+	return NULL;
 }
 
 QList<GeoPoint*> CGeoKernalDensTool::getGeoPoints(GeoLayer * layer)

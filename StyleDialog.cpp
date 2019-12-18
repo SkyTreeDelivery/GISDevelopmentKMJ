@@ -50,10 +50,14 @@ void StyleDialog::initTree(GeoLayer* layer)
 		outlineItem->addChild(outline_color);
 		outlineItem->addChild(outline_width);
 
-		QTreeWidgetItem* fill_color = new QTreeWidgetItem(QStringList() << "color");
-		fill_color->setIcon(0, iconcolor);
-		itemType.insert(fill_color, EnumType::styleType::MARKETCOLOR);
-		fillItem->addChild(fill_color);
+		QTreeWidgetItem* marker_color = new QTreeWidgetItem(QStringList() << "color");
+		marker_color->setIcon(0, iconcolor);
+		QTreeWidgetItem* marker_size = new QTreeWidgetItem(QStringList() << "size");
+		marker_size->setIcon(0, iconcolor);
+		itemType.insert(marker_color, EnumType::styleType::MARKETCOLOR);
+		itemType.insert(marker_size, EnumType::styleType::MARKERSIZE);
+		fillItem->addChild(marker_color);
+		fillItem->addChild(marker_size);
 
 		toolTree->expandAll();  //必须在之后调用
 	}
@@ -113,7 +117,7 @@ void StyleDialog::on_item_clicked(QTreeWidgetItem* item) {
 	if (itemType.contains(item)) {
 		int type = itemType[item];   //itemType[item] 这种方式必须要使得item在itemtype，如不在map中，会自动添加一个默认的值给value，需要先判断是否包含
 		if (featureType == EnumType::POLYGON && type == EnumType::LINECOLOR) {
-			QColor result = QColorDialog::getColor(fill_outline->getColor(), this, "line color");
+			QColor result = QColorDialog::getColor(fill_outline->getColor(), this, "fill outline color");
 			if (result.isValid()) {
 				fill_outline->setColor(result);
 				emit renderLayerSignal(layer);
@@ -135,24 +139,24 @@ void StyleDialog::on_item_clicked(QTreeWidgetItem* item) {
 			}
 		}
 		else if (featureType == EnumType::POINT && type == EnumType::LINECOLOR) {
-			QColor result = QColorDialog::getColor(marker_line->getColor(), this, "line color");
+			QColor result = QColorDialog::getColor(marker_line->getColor(), this, "point outline color");
 			if (result.isValid()) {
 				marker_line->setColor(result);
 				emit renderLayerSignal(layer);
 			}
 		}
-		else if (featureType == EnumType::POINT && type == EnumType::FILLCOLOR) {
-			QColor result = QColorDialog::getColor(marker->getColor(), this, "fill color");
+		else if (featureType == EnumType::POINT && type == EnumType::MARKETCOLOR) {
+			QColor result = QColorDialog::getColor(marker->getColor(), this, "point color");
 			if (result.isValid()) {
 				marker->setColor(result);
 				emit renderLayerSignal(layer);
 			}
 		}
-		else if (featureType == EnumType::POINT && type == EnumType::LINEWIDTH) {
-			LinewidthDialog dialog(marker_line->getWidth());
+		else if (featureType == EnumType::POINT && type == EnumType::MARKERSIZE) {
+			LinewidthDialog dialog(marker->getSize());
 			int result = dialog.exec();
 			if (result == QDialog::Accepted) {
-				marker_line->setWidth(dialog.getWidth());
+				marker->setSize(dialog.getWidth());
 				emit renderLayerSignal(layer);
 			}
 		}

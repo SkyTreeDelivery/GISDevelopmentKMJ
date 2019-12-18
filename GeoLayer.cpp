@@ -3,10 +3,10 @@
 #include "util.h"
 
 GeoLayer::GeoLayer():render(NULL),visibility(true), selectMode(EnumType::selectMode::SINGLEMODE),
-dataChangeType(EnumType::dataChangedType::NOCHANGEDATA), indexMode(EnumType::indexMode::QUADTREE),
+dataChangeType(EnumType::dataChangedType::NOCHANGEDATA), indexMode(EnumType::indexMode::QUADTREE),type(-1),
 globalDefaultColomn("")
 {
-	type = -1;
+
 }
 
 GeoLayer::~GeoLayer()
@@ -116,21 +116,23 @@ void GeoLayer::bindDefaultRender()
 	MarkerSymbol* markerSymbol = new MarkerSymbol();
 	FillSymbol* fillSymbol = new FillSymbol();
 	QColor black;
+	QColor red;
 	QColor white;
 	QColor yellow;
 	QColor EEEEEE;
 	black.setNamedColor("black");
+	red.setNamedColor("red");
 	white.setNamedColor("white");
 	yellow.setNamedColor("yellow");
 	EEEEEE.setNamedColor("#EEEEEE");
-	lineSymbol->setWidth(1);
+	lineSymbol->setWidth(1.5);   //线宽默认为1.5
 	lineSymbol->setColor(black);
 	markerOutlineSymbol->setWidth(1);
 	markerOutlineSymbol->setColor(black);
 	fillOutlineSymbol->setWidth(1);
 	fillOutlineSymbol->setColor(black);
-	markerSymbol->setColor(yellow);
-	markerSymbol->setSize(1);
+	markerSymbol->setColor(red);
+	markerSymbol->setSize(8);  //点的size默认为8
 	markerSymbol->setOutline(markerOutlineSymbol);
 	fillSymbol->setColor(EEEEEE);
 	fillSymbol->setOutline(fillOutlineSymbol);

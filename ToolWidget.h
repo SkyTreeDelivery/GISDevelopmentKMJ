@@ -3,6 +3,8 @@
 #include <QWidget>
 #include <qtreewidget.h>
 #include <GeoMap.h>
+#include "AccessAnalysisWidget.h"
+#include "ogrsf_frmts.h"
 namespace Ui { class ToolWidget; };
 
 class ToolWidget : public QWidget
@@ -18,6 +20,9 @@ private:
 	GeoMap* map;
 	QTreeWidget* toolTree;
 	void initToolTree();
+	AccessAnalysisWidget* aaw;
+
+	void initAccessibilityAnalysisWidget();
 public slots:
 	void on_item_clicked(QTreeWidgetItem* item);
 };

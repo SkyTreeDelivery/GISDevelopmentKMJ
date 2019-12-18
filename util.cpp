@@ -293,6 +293,7 @@ GeoLayer * util::openShapeFile(QString path)
 		quadTree->CreateQuadTree(layer->getRect(), layer->getAllFeature());
 		layer->setIndex(quadTree);
 	}
+	poDS->Release();
 	if (layer->size()) {
 		return layer;
 	}
@@ -330,60 +331,59 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 	//创建图层,由于用户只指定一个表，所以数据全部位于第一个图层上
 	OGRFeature *poFeature;
 	poLayer->ResetReading();
-
 	//遍历所有的要素
 	while ((poFeature = poLayer->GetNextFeature()) != nullptr)
 	{
-		OGRwkbGeometryType type = poLayer->GetGeomType();
-		if (type == OGRwkbGeometryType::wkbPoint)layer->setType(EnumType::POINT);
-		else if (type == OGRwkbGeometryType::wkbLineString)layer->setType(EnumType::POLYLINE);
-		else if (type == OGRwkbGeometryType::wkbPolygon)layer->setType(EnumType::POLYGON);
-		GeoFeature * feature = new GeoFeature;
-		layer->addFeature(feature);
-
-		//获取属性信息并打印
-		QMap<QString, QVariant>* attriMap = feature->getAttributeMap();
-		OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
-		int fieldNum = poFDefn->GetFieldCount(); //获得字段的数目，不包括前两个字段（FID,Shape），这两个字段在arcgis里也不能被修改;
-		QList<QString> nameList;
-		for (int fieldi = 0; fieldi < fieldNum; fieldi++)
-		{
-			OGRFieldDefn *poFieldDefn = poFDefn->GetFieldDefn(fieldi);
-			QString attriName(poFieldDefn->GetNameRef());
-			if (!hasInitAttriNames) nameList.push_back(attriName);
-			//根据字段值得类型，选择对应的输出
-			if (poFieldDefn->GetType() == OFTInteger) {
-				QVariant attriValue(poFeature->GetFieldAsInteger(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-			else if (poFieldDefn->GetType() == OFTReal) {
-				QVariant attriValue(poFeature->GetFieldAsDouble(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-			else if (poFieldDefn->GetType() == OFTString) {
-				QVariant attriValue(poFeature->GetFieldAsString(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-			else {
-				QVariant attriValue(poFeature->GetFieldAsString(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-		}
-		if (!hasInitAttriNames) {
-			layer->setAttributeNames(nameList);
-			hasInitAttriNames = true;
-		}
-		//获取空间位置信息，创建相应的对象并分配存储空间
-		//在postgis中，都是multi的要素！！！
 		OGRGeometry *poGeometry;
 		poGeometry = poFeature->GetGeomFieldRef(0);
-		//          poGeometry = poFeature->GetGeometryRef();
 		if (poGeometry != nullptr)
 		{
-			//point
-			OGRwkbGeometryType pGeoType = poGeometry->getGeometryType();
-			if (pGeoType == wkbPoint)
+			GeoFeature * feature = new GeoFeature;
+			layer->addFeature(feature); 
+			OGRwkbGeometryType pGeoType;
+			if (layer->getType() == -1) {
+				pGeoType = poGeometry->getGeometryType();
+				if (pGeoType == wkbPoint)layer->setType(EnumType::POINT);
+				else if (pGeoType == wkbLineString || pGeoType == wkbMultiLineString )layer->setType(EnumType::POLYLINE);
+				else if (pGeoType == wkbPolygon || pGeoType == wkbMultiPolygon)layer->setType(EnumType::POLYGON);
+			}
+
+			//获取属性信息并打印
+			QMap<QString, QVariant>* attriMap = feature->getAttributeMap();
+			OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
+			int fieldNum = poFDefn->GetFieldCount(); //获得字段的数目，不包括前两个字段（FID,Shape），这两个字段在arcgis里也不能被修改;
+			QList<QString> nameList;
+			for (int fieldi = 0; fieldi < fieldNum; fieldi++)
 			{
+				OGRFieldDefn *poFieldDefn = poFDefn->GetFieldDefn(fieldi);
+				QString attriName(poFieldDefn->GetNameRef());
+				if (!hasInitAttriNames) nameList.push_back(attriName);
+				//根据字段值得类型，选择对应的输出
+				if (poFieldDefn->GetType() == OFTInteger) {
+					QVariant attriValue(poFeature->GetFieldAsInteger(fieldi));
+					attriMap->insert(attriName, attriValue);
+				}
+				else if (poFieldDefn->GetType() == OFTReal) {
+					QVariant attriValue(poFeature->GetFieldAsDouble(fieldi));
+					attriMap->insert(attriName, attriValue);
+				}
+				else if (poFieldDefn->GetType() == OFTString) {
+					QVariant attriValue(poFeature->GetFieldAsString(fieldi));
+					attriMap->insert(attriName, attriValue);
+				}
+				else {
+					QVariant attriValue(poFeature->GetFieldAsString(fieldi));
+					attriMap->insert(attriName, attriValue);
+				}
+			}
+			if (!hasInitAttriNames) {
+				layer->setAttributeNames(nameList);
+				hasInitAttriNames = true;
+			}
+			//获取空间位置信息，创建相应的对象并分配存储空间
+			//在postgis中，都是multi的要素！！！
+			//point
+			if (pGeoType == wkbPoint){
 				OGRPoint *poPoint = (OGRPoint *)poGeometry;
 				double x = poPoint->getX();
 				double y = poPoint->getY();
@@ -393,11 +393,25 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 				feature->setGemetry(point);
 				point->setXYf(x, y);
 			}
-
+			else if (pGeoType == wkbLineString) {
+				OGRLineString *pPolyline = (OGRLineString*)poGeometry->clone();
+				int pointNum = pPolyline->getNumPoints();
+				if (pointNum == 0)
+					continue;
+				GeoPolyline* polyline = new GeoPolyline;
+				feature->setGemetry(polyline);
+				for (int j = 0; j < pointNum; j++){
+					double x = pPolyline->getX(j);
+					double y = pPolyline->getY(j);
+					qDebug("%.15lf,%.15lf", x, y);
+					GeoPoint* p = new GeoPoint;
+					polyline->addPoint(p);
+					p->setXYf(x, y);
+				}
+			}
 			//polygon
 			else if (pGeoType == wkbPolygon)
 			{
-				QRectF polygonRect;
 				OGRPolygon *pPolygon = (OGRPolygon*)poGeometry->clone();
 				OGRLinearRing * poLR = pPolygon->getExteriorRing();//找出多边形边界
 				int pointNum = poLR->getNumPoints();
@@ -405,8 +419,7 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 					continue;
 				GeoPolygon* polygon = new GeoPolygon;
 				feature->setGemetry(polygon);
-				for (int j = 0; j < pointNum; j++)
-				{
+				for (int j = 0; j < pointNum; j++){
 					double x = poLR->getX(j);
 					double y = poLR->getY(j);
 					qDebug("%.15lf,%.15lf", x, y);
@@ -415,16 +428,40 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 					p->setXYf(x, y);
 				}
 			}
-
+			else if (pGeoType == wkbMultiLineString) {
+				OGRMultiLineString *pMulPolyline = (OGRMultiLineString*)poGeometry;
+				OGRLineString *pPolyline;
+				int polylineNum = pMulPolyline->getNumGeometries();
+				//如果该multipolyline只由一个多边形组成，则按单一多边形处理
+				if (polylineNum == 1) {
+					pPolyline = (OGRLineString*)pMulPolyline->getGeometryRef(0)->clone();
+					int pointNum = pPolyline->getNumPoints();
+					if (pointNum == 0)
+						continue;
+					GeoPolyline* polyline = new GeoPolyline;
+					feature->setGemetry(polyline);
+					for (int j = 0; j < pointNum; j++) {
+						double x = pPolyline->getX(j);
+						double y = pPolyline->getY(j);
+						qDebug("%.15lf,%.15lf", x, y);
+						GeoPoint* p = new GeoPoint;
+						polyline->addPoint(p);
+						p->setXYf(x, y);
+					}
+				}
+				else {
+					for (int i = 0; i < polylineNum; i++) {
+						pPolyline = (OGRLineString*)pMulPolyline->getGeometryRef(i);
+					}
+				}
+			}
 			//multipolygon
-			else if (pGeoType == wkbMultiPolygon)
-			{
+			else if (pGeoType == wkbMultiPolygon){
 				OGRMultiPolygon *pMulPolygon = (OGRMultiPolygon*)poGeometry;
 				OGRPolygon *pPolygon;
 				int polygonNum = pMulPolygon->getNumGeometries();
 				//如果该multipolygon只由一个多边形组成，则按单一多边形处理
-				if (polygonNum == 1)
-				{
+				if (polygonNum == 1){
 					QRectF polygonRect;
 					pPolygon = (OGRPolygon*)pMulPolygon->getGeometryRef(0)->clone();
 					OGRLinearRing * poLR = pPolygon->getExteriorRing();//找出多边形边界
@@ -433,8 +470,7 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 						continue;
 					GeoPolygon* polygon = new GeoPolygon;
 					feature->setGemetry(polygon);
-					for (int j = 0; j < pointNum; j++)
-					{
+					for (int j = 0; j < pointNum; j++){
 						double x = poLR->getX(j);
 						double y = poLR->getY(j);
 						qDebug("%.15lf,%.15lf", x, y);
@@ -443,21 +479,19 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 						p->setXYf(x, y);
 					}
 				}
-				else
-				{
-					for (int i = 0; i < polygonNum; i++)
-					{
+				else{
+					for (int i = 0; i < polygonNum; i++){
 						pPolygon = (OGRPolygon*)pMulPolygon->getGeometryRef(i);
 					}
 				}
 			}
-			else
-			{
+			else{
 				printf("no point geometry\n");
 			}
 		}
-		else
+		else {
 			OGRFeature::DestroyFeature(poFeature);
+		}
 	}
 	if (layer->getIndexMode() == EnumType::indexMode::GRIDINDEX) {
 		GridIndex* gridIndex = new GridIndex;
@@ -469,6 +503,7 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 		quadTree->CreateQuadTree(layer->getRect(), layer->getAllFeature());
 		layer->setIndex(quadTree);
 	}
+	pODS->Release();
 	if (layer->size()) {
 		return layer;
 	}

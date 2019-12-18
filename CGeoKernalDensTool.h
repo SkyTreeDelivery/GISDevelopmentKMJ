@@ -16,7 +16,7 @@ public:
 	CGeoKernalDensTool();
 	~CGeoKernalDensTool();
 	//进行分析,所有的函数按顺序或嵌套调用，写在这里面
-    int run_tool();
+    GeoLayer* run_tool();
 
 	//从layer中得到点要素
 	QList<GeoPoint*> getGeoPoints(GeoLayer *layer);
