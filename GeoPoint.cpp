@@ -6,6 +6,18 @@ GeoPoint::GeoPoint()
     this->type = EnumType::POINT;
 }
 
+GeoPoint::GeoPoint(float xf, float yf)
+{
+	x = xf;
+	y = yf;
+}
+
+GeoPoint::GeoPoint(QPointF point)
+{
+	x = point.x();
+	y = point.y();
+}
+
 GeoPoint::~GeoPoint()
 {
 	

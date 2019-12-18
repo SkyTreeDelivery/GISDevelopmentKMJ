@@ -7,6 +7,8 @@ class GeoPoint : public GeoGeometry
 {
 public:
     GeoPoint();
+	GeoPoint(float xf,float yf);
+	GeoPoint(QPointF point);
 	~GeoPoint();
 	double getXf();
 	void setXf(double x);

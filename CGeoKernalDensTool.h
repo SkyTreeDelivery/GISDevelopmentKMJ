@@ -40,9 +40,6 @@ public:
 
 	//获取图层信息
 	void setLayer(GeoLayer *layer1);
-
-	//计算一组数的中值
-	float getMedian(QList<float> nums);
 private:
 	GeoLayer *layer;
 };
