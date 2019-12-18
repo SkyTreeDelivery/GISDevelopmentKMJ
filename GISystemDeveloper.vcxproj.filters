@@ -129,6 +129,18 @@
     <ClCompile Include="QuadNode.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="kernalDensity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeoTool.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CGeoKernalDensTool.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="COption.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeoLayer.h">
@@ -206,6 +218,15 @@
     <ClInclude Include="QuadNode.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="GeoTool.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CGeoKernalDensTool.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="COption.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -225,6 +246,9 @@
     <QtUic Include="postgisDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="kernaldensity.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mainwindow.h">
@@ -233,10 +257,13 @@
     <QtMoc Include="StyleWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="postgisDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
     <QtMoc Include="LinewidthDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="postgisDialog.h">
+    <QtMoc Include="kernalDensity.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

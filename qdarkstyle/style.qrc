@@ -216,4 +216,7 @@
     <qresource prefix="/qdarkstyle">
         <file>styleLight1.qss</file>
     </qresource>
+    <qresource prefix="/openFile">
+        <file>openfile.jpg</file>
+    </qresource>
 </RCC>

@@ -534,15 +534,39 @@ void QtFunctionWidget::on_setSymbol(Symbol * symbol)
 	renderLayer(currentLayer);   //样式发生了变化因此重新渲染
 }
 
-
 void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 {
 	if(e->button() == Qt::LeftButton){   //左键
-		GeoPoint *point = new GeoPoint;
-		point->setXYf(100, 25);
-		GeoFeature* feature= map->getLayerAt(0)->Identify(point, map->getLayerAt(0), 0.05);
-		QMap<QString, QVariant>* attriMap = feature->getAttributeMap();
-		qDebug() << attriMap->size();
+//测试核密度
+		//新建对话框
+		KernalDensity *kdDialog = new KernalDensity();
+		Qt::WindowFlags flags = kdDialog->windowFlags();
+		kdDialog->setWindowFlags(flags | Qt::MSWindowsFixedSizeDialogHint);
+
+		kdDialog->setMap(map);//将map传递给对话框
+
+		int ret = kdDialog->exec();//以模态方式显示对话框
+		if (ret == QDialog::Accepted)//点击OK之后进行核密度分析
+		{
+			//创建Option
+			COption *kdOpt = new COption();
+			kdOpt->input_file = kdDialog->getInputFile();
+			kdOpt->population_field = kdDialog->getPopulation();
+			kdOpt->output_file = kdDialog->getOutputFile();
+			kdOpt->output_cell_size = kdDialog->getRasterSize().toFloat();
+			kdOpt->search_radius = kdDialog->getSearchR().toFloat();
+			kdOpt->area_unit = kdDialog->getAreaUnits();
+			kdOpt->output_value_type = kdDialog->getOutValues();
+			kdOpt->method_type = kdDialog->getMethod();
+			//创建tool
+			CGeoKernalDensTool *kdTool = new CGeoKernalDensTool();
+			kdTool->set_option(kdOpt);
+			//将数据传入kdTool
+			kdTool->setLayer(map->getLayerAt(kdOpt->input_file));//获取当前图层的索引
+			//进行核密度分析
+			kdTool->run_tool();
+		}
+
 	}
 	else if(e->button() == Qt::RightButton){   //右键
        

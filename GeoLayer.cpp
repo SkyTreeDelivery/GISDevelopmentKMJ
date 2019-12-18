@@ -196,9 +196,9 @@ QList<GeoFeature*> GeoLayer::search(GeoLayer * layer, QString attriName, QString
 	return featuresFound;
 }
 
-QList<QString> GeoLayer::getAttriNames(GeoLayer * layer)
+QList<QString> GeoLayer::getAttriNames()
 {
-	QVariantMap *variantMap=layer->getFeatureAt(0)->getAttributeMap();
+	QVariantMap *variantMap=this->getFeatureAt(0)->getAttributeMap();
 	return variantMap->keys();
 }
 

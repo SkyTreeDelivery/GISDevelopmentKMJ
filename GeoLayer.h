@@ -47,7 +47,7 @@ public:
 	GeoFeature *Identify(GeoPoint *point, GeoLayer *layer, int threshold);
 	//查询
 	QList<GeoFeature*> search(GeoLayer* layer, QString attriName, QString attriValue);
-	QList<QString> getAttriNames(GeoLayer *layer);
+	QList<QString> getAttriNames();
     //获取和添加索引类型
 	void setIndexMode(int mode);
 	int getIndexMode();

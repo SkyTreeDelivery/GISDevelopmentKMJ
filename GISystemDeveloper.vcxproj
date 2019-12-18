@@ -146,7 +146,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt5Widgetsd.lib;Qt5Guid.lib;Qt5Cored.lib;Qt5Xmld.lib;qtmaind.lib;gdal_i.lib;Qt5Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Qt5Widgetsd.lib;Qt5Guid.lib;Qt5Cored.lib;Qt5Xmld.lib;qtmaind.lib;gdal_i.lib;Qt5Network.lib;Qt5Gui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\opensslx86\lib;C:\Utils\postgresqlx86\pgsql\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -256,7 +256,7 @@
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt5Widgetsd.lib;Qt5Guid.lib;Qt5Cored.lib;Qt5Xmld.lib;qtmaind.lib;gdal_i.lib;Qt5Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Qt5Widgetsd.lib;Qt5Guid.lib;Qt5Cored.lib;Qt5Xmld.lib;qtmaind.lib;gdal_i.lib;Qt5Network.lib;Qt5Gui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>E:\gdal221_pgsql\lib;E:\Qt_5.13.2\5.13.2\msvc2017\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -344,8 +344,10 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CGeoKernalDensTool.cpp" />
     <ClCompile Include="cjson\cJSON.c" />
     <ClCompile Include="cjson\CJsonObject.cpp" />
+    <ClCompile Include="COption.cpp" />
     <ClCompile Include="FillSymbol.cpp" />
     <ClCompile Include="GeoFeature.cpp" />
     <ClCompile Include="GeoLayer.cpp" />
@@ -354,10 +356,12 @@
     <ClCompile Include="GeoPoint.cpp" />
     <ClCompile Include="GeoPolygon.cpp" />
     <ClCompile Include="GeoPolyline.cpp" />
+    <ClCompile Include="GeoTool.cpp" />
     <ClCompile Include="gpc\gpc.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridIndex.cpp" />
     <ClCompile Include="Index.cpp" />
+    <ClCompile Include="kernalDensity.cpp" />
     <ClCompile Include="LineSymbol.cpp" />
     <ClCompile Include="LinewidthDialog.cpp" />
     <ClCompile Include="mainwindow.cpp" />
@@ -374,8 +378,10 @@
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CGeoKernalDensTool.h" />
     <ClInclude Include="cjson\cJSON.h" />
     <ClInclude Include="cjson\CJsonObject.hpp" />
+    <ClInclude Include="COption.h" />
     <ClInclude Include="EnumType.h" />
     <ClInclude Include="FillSymbol.h" />
     <ClInclude Include="GeoFeature.h" />
@@ -385,10 +391,12 @@
     <ClInclude Include="GeoPoint.h" />
     <ClInclude Include="GeoPolygon.h" />
     <ClInclude Include="GeoPolyline.h" />
+    <ClInclude Include="GeoTool.h" />
     <ClInclude Include="gpc\gpc.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GridIndex.h" />
     <ClInclude Include="Index.h" />
+    <QtMoc Include="kernalDensity.h" />
     <ClInclude Include="LineSymbol.h" />
     <QtMoc Include="mainwindow.h" />
     <QtMoc Include="LinewidthDialog.h" />
@@ -433,6 +441,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="kernaldensity.ui" />
     <QtUic Include="LinewidthDialog.ui" />
     <QtUic Include="mainwindow.ui" />
     <QtUic Include="postgisDialog.ui" />

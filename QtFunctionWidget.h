@@ -11,6 +11,11 @@
 #include <QMouseEvent>
 #include <qstring.h>
 
+//测试核密度时加入的
+#include"kernalDensity.h"
+#include"GeoTool.h"
+#include"CGeoKernalDensTool.h"
+
 class QtFunctionWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
 public:
@@ -86,5 +91,8 @@ public slots:
 	void on_deleteLayerData(GeoLayer* layer);
 	void on_zoomToLayerRect(GeoLayer* layer);
 	void on_setSymbol(Symbol* symbol);
+	//测试核密度
+signals:
+
 };
 
