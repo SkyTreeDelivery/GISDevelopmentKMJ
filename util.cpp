@@ -34,7 +34,6 @@ QString util::openFileDialog(QWidget* widget, QString curPath)
 //TODO 点线面测试完成
 GeoLayer* util::openGeoJson(QString path)
 {
-
 	QFile file(path);
     if (!file.exists()) //文件不存在
         return false;
@@ -42,8 +41,6 @@ GeoLayer* util::openGeoJson(QString path)
         return false;
 	QByteArray text  = file.readAll();
 	QJsonParseError error;
-	bool hasInitAttriNames = false;
-	QList<QString> nameList;
 
 	//注意，大坑，不能有中文，同时fromJson作为一个file指针， 在不移动指针位置的情况下只能使用一次
 	//果然有问题还是得上geogle，一般问题还好，稍微偏门一点的问题就不行了
@@ -52,6 +49,8 @@ GeoLayer* util::openGeoJson(QString path)
     QJsonObject jsonData = jsonDocu.object();
     QJsonArray featuresJ = jsonData["features"].toArray();
 
+
+	//读取数据
 	GeoLayer* layer = new GeoLayer();
 	layer->setSource(EnumType::source::GEOJSON);
 	layer->bindDefaultRender();
@@ -75,12 +74,7 @@ GeoLayer* util::openGeoJson(QString path)
 		QList<QString> keys = attriMap.keys();
 		for (int i = 0; i < keys.size(); i++) {
 			map->insert(keys.at(i), attriMap[keys.at(i)]);
-			if (!hasInitAttriNames) {
-				nameList.push_back(keys.at(i));
-			}
 		}
-		layer->setAttributeNames(nameList);
-		hasInitAttriNames = true;
 		//读取geometry
 		QJsonObject geometryJ = featureJ["geometry"].toObject();
 		QString type = geometryJ.value("type").toString();
@@ -128,9 +122,26 @@ GeoLayer* util::openGeoJson(QString path)
 		}
 
     }
+
+	//创建索引
+	int indexMode = layer->getIndexMode();//如果不加以设置，layer默认为网格索引
+	if (indexMode == EnumType::GRIDINDEX)//创建网格索引
+	{
+		GridIndex *spatialIndex = new GridIndex();
+		spatialIndex->setGrid(layer->getRect(), layer->getAllFeature());
+		layer->setSpatialIndex(spatialIndex);
+	}
+	else if (indexMode == EnumType::QUADTREE)//创建四叉树索引
+	{
+		QuadTree *spatialIndex = new QuadTree();
+		spatialIndex->CreateQuadTree(layer->getRect(), layer->getAllFeature());
+		layer->setSpatialIndex(spatialIndex);
+	}
+
 	if(layer->size()){
 		return layer;
 	}
+
     return NULL;
 }
 
@@ -176,32 +187,21 @@ GeoLayer * util::openShapeFile(QString path)
 		GeoFeature* feature = new GeoFeature;
 		layer->addFeature(feature);
 		//获取属性信息并打印
-		QMap<QString, QVariant>* attriMap = feature->getAttributeMap();
 		OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
 		int fieldNum = poFDefn->GetFieldCount(); //获得字段的数目，不包括前两个字段（FID,Shape），这两个字段在arcgis里也不能被修改;
 		for (int fieldi = 0; fieldi < fieldNum; fieldi++)
 		{
 			OGRFieldDefn *poFieldDefn = poFDefn->GetFieldDefn(fieldi);
-			QString attriName(poFieldDefn->GetNameRef());
-			//根据字段值得类型，选择对应的输出
-			if (poFieldDefn->GetType() == OFTInteger) {
-				QVariant attriValue(poFeature->GetFieldAsInteger(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-			else if (poFieldDefn->GetType() == OFTReal) {
-				QVariant attriValue(poFeature->GetFieldAsDouble(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-			else if (poFieldDefn->GetType() == OFTString) {
-				QVariant attriValue(poFeature->GetFieldAsString(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-			else {
-				QVariant attriValue(poFeature->GetFieldAsString(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
+			//根据字段值的类型，选择对应的输出
+			if (poFieldDefn->GetType() == OFTInteger)
+				qDebug() << poFeature->GetFieldAsInteger(fieldi);
+			else if (poFieldDefn->GetType() == OFTReal)
+				qDebug() << poFeature->GetFieldAsDouble(fieldi);
+			else if (poFieldDefn->GetType() == OFTString)
+				qDebug() << poFeature->GetFieldAsString(fieldi);
+			else
+				qDebug() << poFeature->GetFieldAsString(fieldi);
 		}
-
 		//获取空间位置信息，创建相应的对象并分配存储空间
 		OGRGeometry *poGeometry;
 		poGeometry = poFeature->GetGeometryRef();
@@ -310,33 +310,25 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 		else if (type == OGRwkbGeometryType::wkbPolygon)layer->setType(EnumType::POLYGON);
 		GeoFeature * feature = new GeoFeature;
 		layer->addFeature(feature);
-
 		//获取属性信息并打印
-		QMap<QString, QVariant>* attriMap = feature->getAttributeMap();
+
 		OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
-		int fieldNum = poFDefn->GetFieldCount(); //获得字段的数目，不包括前两个字段（FID,Shape），这两个字段在arcgis里也不能被修改;
+		int fieldNum = poFDefn->GetFieldCount(); //获得字段的数目，本实例返回5，不包括前两个字段（FID,Shape），这两个字段在arcgis里也不能被修改;
 		for (int fieldi = 0; fieldi < fieldNum; fieldi++)
 		{
+			//qDebug()<<"field"<<fieldi;
 			OGRFieldDefn *poFieldDefn = poFDefn->GetFieldDefn(fieldi);
-			QString attriName(poFieldDefn->GetNameRef());
 			//根据字段值得类型，选择对应的输出
-			if (poFieldDefn->GetType() == OFTInteger) {
-				QVariant attriValue(poFeature->GetFieldAsInteger(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-			else if (poFieldDefn->GetType() == OFTReal) {
-				QVariant attriValue(poFeature->GetFieldAsDouble(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-			else if (poFieldDefn->GetType() == OFTString) {
-				QVariant attriValue(poFeature->GetFieldAsString(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
-			else {
-				QVariant attriValue(poFeature->GetFieldAsString(fieldi));
-				attriMap->insert(attriName, attriValue);
-			}
+			if (poFieldDefn->GetType() == OFTInteger)
+				qDebug() << poFeature->GetFieldAsInteger(fieldi);
+			else if (poFieldDefn->GetType() == OFTReal)
+				qDebug() << poFeature->GetFieldAsDouble(fieldi);
+			else if (poFieldDefn->GetType() == OFTString)
+				qDebug() << poFeature->GetFieldAsString(fieldi);
+			else
+				qDebug() << poFeature->GetFieldAsString(fieldi);
 		}
+
 		//获取空间位置信息，创建相应的对象并分配存储空间
 		//在postgis中，都是multi的要素！！！
 		OGRGeometry *poGeometry;
@@ -510,6 +502,16 @@ GeoLayer * util::openGeoJsonByCJson(QString path)
 	if (layer->size()) {
 		return layer;
 	}
+	return nullptr;
+}
+
+MarkerSymbol * util::parseSLD_Marker(QString path)
+{
+	return nullptr;
+}
+
+LineSymbol * util::parseSLD_Line(QString path)
+{
 	return nullptr;
 }
 

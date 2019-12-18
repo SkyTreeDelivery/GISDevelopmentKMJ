@@ -22,24 +22,10 @@ public:
 	MarkerSymbol* getMarkerSymbol();
 	LineSymbol* getLineSymbol();
 	FillSymbol* getFillSymbol();
-
-	void configSelection(QColor color);
-	void configSelection(float width);
-	void configSelection(QColor color, float width);
-	MarkerSymbol* getSelectionMarkerSymbol();
-	LineSymbol* getSelectionLineSymbol();
-	FillSymbol* getSelectionFillSymbol();
 private:
-	MarkerSymbol* markerSymbol;  //需要手动指定
+	MarkerSymbol* markerSymbol;
 	LineSymbol* lineSymbol;
 	FillSymbol* fillSymbol;
-
-	QColor selectionColor;
-	float selectionWidth;
-
-	MarkerSymbol* selectionMarkerSymbol; //可直接使用默认配置，也可调用configSelection手动指定
-	LineSymbol* selectionLineSymbol;
-	FillSymbol* selectionFillSymbol;
 };
 
 #endif // RENDER_H

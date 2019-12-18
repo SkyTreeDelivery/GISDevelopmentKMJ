@@ -2,37 +2,11 @@
 
 Render::Render()
 {
-	//默认被选择要素的配置为，红色表内框，黄色填充
-	selectionLineSymbol = new LineSymbol();
-	LineSymbol* markerOutlineSymbol = new LineSymbol();
-	LineSymbol* fillOutlineSymbol = new LineSymbol();
-	selectionMarkerSymbol = new MarkerSymbol();
-	selectionFillSymbol = new FillSymbol();
-	QColor red;
-	QColor yellow;
-	red.setNamedColor("red");
-	yellow.setNamedColor("yellow");
-	selectionLineSymbol->setWidth(1);
-	selectionLineSymbol->setColor(red);
-	markerOutlineSymbol->setWidth(1);
-	markerOutlineSymbol->setColor(red);
-	fillOutlineSymbol->setWidth(1);
-	fillOutlineSymbol->setColor(red);
-	selectionMarkerSymbol->setColor(yellow);
-	selectionMarkerSymbol->setSize(1);
-	selectionMarkerSymbol->setOutline(markerOutlineSymbol);
-	selectionFillSymbol->setColor(yellow);
-	selectionFillSymbol->setOutline(fillOutlineSymbol);
+
 }
 
 Render::~Render()
 {
-	if (markerSymbol) delete markerSymbol;
-	if (fillSymbol) delete fillSymbol;
-	if (lineSymbol) delete lineSymbol;
-	if (selectionMarkerSymbol) delete selectionMarkerSymbol;
-	if (selectionFillSymbol) delete selectionFillSymbol;
-	if (selectionLineSymbol) delete selectionLineSymbol;
 }
 
 void Render::draw(QList<GeoGeometry *> objs)
@@ -74,50 +48,4 @@ LineSymbol * Render::getLineSymbol()
 FillSymbol * Render::getFillSymbol()
 {
 	return fillSymbol;
-}
-
-void Render::configSelection(QColor color)
-{
-	configSelection(color, selectionWidth);
-}
-
-void Render::configSelection(float width)
-{
-	configSelection(selectionColor, width);
-}
-
-void Render::configSelection(QColor color, float width)
-{
-	LineSymbol* markerOutlineSymbol = selectionMarkerSymbol->getOutline();
-	LineSymbol* fillOutlineSymbol = selectionFillSymbol->getOutline();
-	if (color != selectionColor) {
-		this->selectionColor = color;
-		selectionLineSymbol->setColor(color);
-		markerOutlineSymbol->setColor(color);
-		fillOutlineSymbol->setColor(color);
-		selectionMarkerSymbol->setColor(color);
-		selectionFillSymbol->setColor(color);
-	}
-	else if (width != selectionWidth) {
-		this->selectionWidth = width;
-		selectionLineSymbol->setWidth(width);
-		selectionMarkerSymbol->setSize(width);
-		markerOutlineSymbol->setWidth(width);
-		fillOutlineSymbol->setWidth(width);
-	}
-}
-
-MarkerSymbol * Render::getSelectionMarkerSymbol()
-{
-	return selectionMarkerSymbol;
-}
-
-LineSymbol * Render::getSelectionLineSymbol()
-{
-	return selectionLineSymbol;
-}
-
-FillSymbol * Render::getSelectionFillSymbol()
-{
-	return selectionFillSymbol;
 }
