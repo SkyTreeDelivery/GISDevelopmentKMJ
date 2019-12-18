@@ -56,7 +56,7 @@ public:
 	
 //与空间查询相关的：
 	//识别
-	GeoFeature *identify(GeoPoint *point, GeoLayer *layer, int threshold);
+	GeoFeature *identify(GeoPoint *point, GeoLayer *layer, float threshold);
 	//查询
 	QList<GeoFeature*> search(QString attriName, QString attriValue);
 	QList<QString> getAttriNames(GeoLayer *layer);

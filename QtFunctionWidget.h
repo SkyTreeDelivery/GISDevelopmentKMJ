@@ -14,6 +14,8 @@
 
 class QtFunctionWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
+	Q_OBJECT
+
 public:
     QtFunctionWidget(QWidget *parent = nullptr);
     ~QtFunctionWidget() Q_DECL_OVERRIDE;
@@ -22,6 +24,7 @@ public:
 	void strongUpdata(); //开放给父类使用，调用project和update，对应
 	void renderLayer(GeoLayer* layer);   //数据和renderer发生了变化的时候调用
 	void switchOpenrateMode(int operateMode);
+	void setHasTableShowing(bool flag);
 	GeoMap* getMap();
 
 protected:
@@ -53,6 +56,7 @@ private:
 	QPoint screenPointEnd;
 	float scale;
 	int operateMode;
+	bool hasTableShowing;
 
 	//-------------------之间的函数会保证安全性，不用额外判断---------------------
 	void addlayer(GeoLayer* layer);
@@ -92,6 +96,9 @@ private:
 
 	void keyPressEvent(QKeyEvent *event);
 	void keyReleaseEvent(QKeyEvent *event);
+
+signals:
+	void changeTableSelectionSignal(GeoFeature* feature);
 
 public slots:
 	void on_addLayerData(GeoLayer* layer);

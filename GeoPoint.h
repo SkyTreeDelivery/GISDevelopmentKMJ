@@ -2,6 +2,7 @@
 #define GEOPOINT_H
 #include "GeoGeometry.h"
 #include <qrect.h>
+#include "GeoFeature.h"
 
 class GeoPoint : public GeoGeometry
 {
@@ -22,6 +23,8 @@ public:
 	QRectF getRect();
 	int size();
 	double disToPoint(GeoPoint *pt);
+	double nearestDisToPoints(QList<GeoPoint*> pts);
+	GeoPoint* nearestPointToPoints(QList<GeoPoint*> pts,float threshole);
 private:
     double x;
     double y;

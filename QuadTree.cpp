@@ -49,10 +49,22 @@ void QuadTree::CreateQuadBranch(int depth, QRectF NodeRect, QuadNode *node, QLis
 				int featureNum = features.size();
 				for (int j = 0; j < featureNum; j++)//对每一个叶子节点遍历每一个要素
 				{
-					QRectF featureRect = features.at(j)->getGeometry()->getRect();
-					if (childRect[i].intersects(featureRect))//如果该子节点的外界矩形与要素相交
-					{
-						childNode->addFeature(features.at(j));
+					GeoGeometry* geometry = features.at(j)->getGeometry();
+					int type = geometry->getType();
+					if (type == EnumType::POLYLINE || type == EnumType::POLYGON) {
+						QRectF featureRect = geometry->getRect();
+						if (childRect[i].intersects(featureRect))//如果该子节点的外界矩形与要素相交
+						{
+							childNode->addFeature(features.at(j));
+						}
+					}
+					else if (type == EnumType::POINT) {
+						GeoPoint* point = (GeoPoint*)geometry;
+						QPointF p(point->getXf(),point->getYf());
+						if (childRect[i].contains(p))//如果该子节点的外界矩形与要素相交
+						{
+							childNode->addFeature(features.at(j));
+						}
 					}
 				}
 			}
@@ -61,54 +73,63 @@ void QuadTree::CreateQuadBranch(int depth, QRectF NodeRect, QuadNode *node, QLis
 	}	
 }
 
-GeoFeature* QuadTree::SearchQuadTree(GeoPoint *point,int thresholed)
+GeoFeature* QuadTree::SearchQuadTree(GeoPoint *point, float thresholed)
 {
 	return SearchQuadBranch(treeDepth, root, point, thresholed);
 }
 
-GeoFeature * QuadTree::SearchQuadBranch(int depth, QuadNode * node, GeoPoint *point, int threshole)
+GeoFeature * QuadTree::SearchQuadBranch(int depth, QuadNode * node, GeoPoint *targetPoint, float threshole)
 {
 	GeoFeature* featureFound = NULL;
 	if (depth!= 0)//非叶节点向下递归查询
 	{
-		if (node->getChildrenAt(0)->getNodeRect().contains(QPointF(point->getXf(), point->getYf())))
-			featureFound = SearchQuadBranch(depth - 1, node->getChildrenAt(0), point, threshole);
-		else if(node->getChildrenAt(1)->getNodeRect().contains(QPointF(point->getXf(), point->getYf())))
-			featureFound = SearchQuadBranch(depth - 1, node->getChildrenAt(1), point, threshole);
-		else if (node->getChildrenAt(2)->getNodeRect().contains(QPointF(point->getXf(), point->getYf())))
-			featureFound = SearchQuadBranch(depth - 1, node->getChildrenAt(2), point, threshole);
-		else if (node->getChildrenAt(3)->getNodeRect().contains(QPointF(point->getXf(), point->getYf())))
-			featureFound = SearchQuadBranch(depth - 1, node->getChildrenAt(3), point, threshole);
+		if (node->getChildrenAt(0)->getNodeRect().contains(QPointF(targetPoint->getXf(), targetPoint->getYf())))
+			featureFound = SearchQuadBranch(depth - 1, node->getChildrenAt(0), targetPoint, threshole);
+		else if(node->getChildrenAt(1)->getNodeRect().contains(QPointF(targetPoint->getXf(), targetPoint->getYf())))
+			featureFound = SearchQuadBranch(depth - 1, node->getChildrenAt(1), targetPoint, threshole);
+		else if (node->getChildrenAt(2)->getNodeRect().contains(QPointF(targetPoint->getXf(), targetPoint->getYf())))
+			featureFound = SearchQuadBranch(depth - 1, node->getChildrenAt(2), targetPoint, threshole);
+		else if (node->getChildrenAt(3)->getNodeRect().contains(QPointF(targetPoint->getXf(), targetPoint->getYf())))
+			featureFound = SearchQuadBranch(depth - 1, node->getChildrenAt(3), targetPoint, threshole);
 	}
 	else if (depth == 0)//叶节点查询并返回空间对象,终止递归查询
 	{
 		QList<GeoFeature*> features = node->getFeaturesAll();
 		int featureNum = features.size();
+		float dis = 99999999999999999;
+		int type = -1;
 		for (int i = 0; i < featureNum; i++)//遍历所有要素
 		{
 			GeoFeature *feature = features.at(i);
 			GeoGeometry *geometry = feature->getGeometry();
-			//如果点击的点与要素点小于一定的距离阈值，则返回该点
-			if (geometry->getType() == EnumType::POINT)
-			{
-				GeoPoint *pt= static_cast<GeoPoint*>(geometry);
-				if (pt->disToPoint(point) < threshole)//如果点到要素点的距离小于距离阈值，找到该要素
-				{
+			if (!i) {
+				type = geometry->getType();
+			}
+			if (type == EnumType::POINT) {
+				if (!i) {
 					featureFound = feature;
-					break;
+					continue;
+				}
+				GeoPoint* ePoint = (GeoPoint*)geometry;
+				float edis = ePoint->disToPoint(targetPoint);
+				if (edis < dis) {
+					dis = edis;
+					featureFound = feature;
 				}
 			}
-			else if (geometry->getType() == EnumType::POLYLINE)
-			{
-				GeoPolyline *polyline = static_cast<GeoPolyline*>(geometry);
-				if (polyline->disToPoint(point) < threshole)//如果点到要素线的距离小于距离阈值，找到该要素
-				{
+			else if (type == EnumType::POLYLINE) {
+				if (!i) {
 					featureFound = feature;
-					break;
+					continue;
+				}
+				GeoPolyline* ePolyline = (GeoPolyline*)geometry;
+				float edis = ePolyline->disToPoint(targetPoint);
+				if (edis < dis) {
+					dis = edis;
+					featureFound = feature;
 				}
 			}
-			//如果点击的点在多边形内则返回该多边形
-			else if (geometry->getType() == EnumType::POLYGON)
+			else if (type == EnumType::POLYGON)
 			{
 				GeoPolygon* polygon = static_cast<GeoPolygon*>(geometry);
 				QVector<QPointF> polygonPoints;
@@ -120,7 +141,7 @@ GeoFeature * QuadTree::SearchQuadBranch(int depth, QuadNode * node, GeoPoint *po
 					pt.setY(polygon->getPointAt(j)->getYf());
 					polygonPoints.append(pt);
 				}
-				if (QPolygonF(polygonPoints).containsPoint(QPointF(point->getXf(), point->getYf()),Qt::FillRule::OddEvenFill))//如果点包含在多边形内，找到该要素
+				if (QPolygonF(polygonPoints).containsPoint(QPointF(targetPoint->getXf(), targetPoint->getYf()),Qt::FillRule::OddEvenFill))//如果点包含在多边形内，找到该要素
 				{
 					featureFound = feature;
 					break;

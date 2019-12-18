@@ -190,7 +190,7 @@ int GeoLayer::getDataChangedType()
 	return dataChangeType;
 }
 
-GeoFeature * GeoLayer::identify(GeoPoint * point, GeoLayer * layer,int threshold)
+GeoFeature * GeoLayer::identify(GeoPoint * point, GeoLayer * layer,float threshold)
 {
 	GeoFeature *featureFound;
 	if (layer->getIndexMode() == EnumType::GRIDINDEX) {

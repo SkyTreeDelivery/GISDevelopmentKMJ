@@ -1,5 +1,6 @@
 #include "geopoint.h"
 #include "EnumType.h"
+#include <qlist.h>
 
 GeoPoint::GeoPoint()
 {
@@ -81,8 +82,44 @@ int GeoPoint::size()
 
 double GeoPoint::disToPoint(GeoPoint* pt)
 {
-	double dx2 = (pow(x, 2) - pow(pt->getXf(), 2));
-	double dy2 = (pow(y, 2) - pow(pt->getYf(), 2));
+	double dx2 = pow(x - pt->getXf(), 2);
+	double dy2 = pow(y - pt->getYf(), 2);
 	return pow(dx2 + dy2, 0.5);
+}
+
+double GeoPoint::nearestDisToPoints(QList<GeoPoint*> pts)
+{
+	float dis = 999999999999999999;
+	if (pts.size()) {
+		GeoPoint* nearestPoint = pts.at(0);
+		for (int i = 1; i < pts.size(); i++) {
+			GeoPoint* p = pts.at(i);
+			float edis = p->disToPoint(&GeoPoint(x, y));
+			if (edis < dis) {
+				dis = edis;
+			}
+		}
+	}
+	return dis;
+}
+
+GeoPoint * GeoPoint::nearestPointToPoints(QList<GeoPoint*> pts, float threshole)
+{
+	float dis = 999999999999999999;
+	if (pts.size()) {
+		GeoPoint* nearestPoint = pts.at(0);
+		for (int i = 1; i < pts.size(); i++) {
+			GeoPoint* p = pts.at(i);
+			float edis = p->disToPoint(&GeoPoint(x, y));
+			if (edis < dis) {
+				nearestPoint = p;
+				dis = edis;
+			}
+		}
+		if (dis < threshole) {
+			return nearestPoint;
+		}
+	}
+	return NULL;
 }
 

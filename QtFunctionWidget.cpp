@@ -7,7 +7,7 @@
 #include "TextOutWidget.h"
 
 QtFunctionWidget::QtFunctionWidget(QWidget *parent) : QOpenGLWidget (parent)
-		,hasSetRect(false), scale(0.8), hasWaH(false),currentLayer(NULL)
+		,hasSetRect(false), scale(0.8), hasWaH(false),currentLayer(NULL), hasTableShowing(false)
 {
 	map = new GeoMap;
 	setMouseTracking(true);
@@ -614,9 +614,15 @@ void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 			GeoFeature* feature = currentLayer->identify(&GeoPoint(worldPoint), currentLayer, worldRect.width()/10);
 			if (feature) {
 				currentLayer->selectFeature(feature);
+				if (hasTableShowing) {
+					emit changeTableSelectionSignal(feature);
+				}
 			}
 			else if(currentLayer->getSelectMode() == EnumType::selectMode::SINGLEMODE){
 				currentLayer->clearSelections();
+				if (hasTableShowing) {
+					emit changeTableSelectionSignal(NULL);
+				}
 			}
 			update();
 		}
@@ -682,7 +688,7 @@ void QtFunctionWidget::keyPressEvent(QKeyEvent * event)
 {
 	switch (event->key())
 	{
-	case Qt::Key_Shift:
+	case Qt::Key_Control:
 		if (operateMode == EnumType::operateMode::IDENTIFY) {
 			currentLayer->setSelectMode(EnumType::selectMode::MULTIMODE);
 		}
@@ -696,7 +702,7 @@ void QtFunctionWidget::keyReleaseEvent(QKeyEvent * event)
 {
 	switch (event->key())
 	{
-	case Qt::Key_Shift:
+	case Qt::Key_Control:
 		if (operateMode == EnumType::operateMode::IDENTIFY) {
 			currentLayer->setSelectMode(EnumType::selectMode::SINGLEMODE);
 		}
@@ -947,4 +953,9 @@ int QtFunctionWidget::getResizeDirection(QRect oriRect, QRect newRect)
 		return EnumType::BOTTOM;
 	}
 	return EnumType::NOCHANGESIZE;
+}
+
+void QtFunctionWidget::setHasTableShowing(bool flag)
+{
+	hasTableShowing = flag;
 }

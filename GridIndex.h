@@ -19,7 +19,7 @@ public:
 	int getGridNum();
 	QList<Grid*> getGridsAll();
 	Grid* getGridAt(int i);
-	GeoFeature* searchGrid(GeoPoint *pt,int thresholed);//查询
+	GeoFeature* searchGrid(GeoPoint *pt,float thresholed);//查询
 private:
 	int row = 10;//默认情况为10*10，下一步会根据范围与要素个数自适应宽高
 	int col = 10;

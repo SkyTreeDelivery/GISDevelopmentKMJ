@@ -66,7 +66,7 @@ Grid * GridIndex::getGridAt(int i)
 	return grids.at(i);
 }
 
-GeoFeature * GridIndex::searchGrid(GeoPoint *point,int thresholed)
+GeoFeature * GridIndex::searchGrid(GeoPoint *point,float thresholed)
 {
 	int gridNum = grids.size();
 

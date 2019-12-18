@@ -13,11 +13,11 @@ Render::Render()
 	red.setNamedColor("red");
 	yellow.setNamedColor("yellow");
 	selectionLineSymbol->setWidth(1);
-	selectionLineSymbol->setColor(red);
+	selectionLineSymbol->setColor(yellow);  //线的被选择变为黄色
 	markerOutlineSymbol->setWidth(1);
-	markerOutlineSymbol->setColor(red);
+	markerOutlineSymbol->setColor(yellow);  //点的被选择变为黄色
 	fillOutlineSymbol->setWidth(1);
-	fillOutlineSymbol->setColor(red);
+	fillOutlineSymbol->setColor(red);   //面的被选择变为黄色填充红色边缘
 	selectionMarkerSymbol->setColor(yellow);
 	selectionMarkerSymbol->setSize(1);
 	selectionMarkerSymbol->setOutline(markerOutlineSymbol);

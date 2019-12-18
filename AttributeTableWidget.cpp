@@ -75,13 +75,15 @@ void AttributeTableWidget::initTable()
 		colomnNameList.append(attriNames.at(i));
 	}
 	table->setHorizontalHeaderLabels(colomnNameList);
-	table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-	table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+	//table->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed); //行宽可自定义
+	table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);  
+	table->horizontalHeader()->setHighlightSections(false);
 	table->setRowCount(rowNum);
 
 	//填充数据
 	for (int i = 0; i < rowNum; i++) {
 		GeoFeature* feature = originFeatures.at(i);
+		featureRowMap.insert(feature, i);
 		QMap<QString, QVariant>* map = feature->getAttributeMap();
 		for (int j = 0; j < colNum; j++) {
 			QString attriName = attriNames.at(j);
@@ -122,6 +124,44 @@ void AttributeTableWidget::on_fileTree_contextMenu_request(const QPoint & pos)
 		return;
 	}
 	itemMenu->exec(QCursor::pos());
+}
+
+void AttributeTableWidget::on_glFeatureSelected(GeoFeature * feature)
+{
+	if (!feature) {  //为空就清空选择
+		table->clearSelection();
+		return;
+	}
+	if (keyPressed == Qt::Key_No) {  //此时为单选模式
+		startRow = featureRowMap[feature];
+		table->clearSelection();
+		table->selectRow(startRow);
+	}
+	/*else if (keyPressed == Qt::Key_Shift) {  //此时为连选模式
+		if (startRow == -1) {
+			startRow = featureRowMap[feature];
+			table->clearSelection();
+			table->selectRow(startRow);
+		}
+		else {
+			endRow = featureRowMap[feature];
+			table->clearSelection();
+			if (startRow > endRow) {
+				for (int i = startRow; i >= endRow; i--) {
+					table->selectRow(i);
+				}
+			}
+			else {
+				for (int i = startRow; i < endRow; i++) {
+					table->selectRow(i);
+				}
+			}
+		}
+	}*/  //对于图层的选择不需要连选模式
+	else if (keyPressed == Qt::Key_Control) {  //此为多选模式
+		startRow = featureRowMap[feature];
+		table->selectRow(startRow);
+	}
 }
 
 void AttributeTableWidget::on_item_clicked(QTableWidgetItem* item)
