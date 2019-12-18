@@ -562,9 +562,14 @@ void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 			CGeoKernalDensTool *kdTool = new CGeoKernalDensTool();
 			kdTool->set_option(kdOpt);
 			//将数据传入kdTool
-			kdTool->setLayer(map->getLayerAt(kdOpt->input_file));//获取当前图层的索引
-			//进行核密度分析
-			kdTool->run_tool();
+			if (kdOpt->input_file >= 0)
+			{
+				kdTool->setLayer(map->getLayerAt(kdOpt->input_file));//获取当前图层的索引
+				//如果有数据输入则进行核密度分析
+				kdTool->run_tool();
+			}
+			else
+				QMessageBox::critical(NULL, "Input Error", "No Input", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);			
 		}
 
 	}

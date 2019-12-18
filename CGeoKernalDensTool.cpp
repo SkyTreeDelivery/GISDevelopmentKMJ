@@ -13,21 +13,20 @@ CGeoKernalDensTool::~CGeoKernalDensTool()
 
 int CGeoKernalDensTool::run_tool()
 {
-	//根据用户的输入获得所有参数
-	QList<GeoPoint*>points = getGeoPoints(layer);
-	QRectF layerRect = layer->getRect();
-	QList<float> populations = getPopulations(points, layer);
-	QString output_file = option->output_file;
-	float output_cell_size = getCellSize(layerRect);
-	float search_radius = getSearchRadius(points, populations, layerRect);
-	int area_unit = option->area_unit;
-	int method = option->method_type;
-	//调用核密度分析函数进行分析
-	float **KDResult = KernelDensity(points, populations, output_cell_size, 
-		search_radius, area_unit, method, layerRect);
-	//写入分析结果
-	saveResult(output_file, KDResult, layerRect, output_cell_size);
-
+		//根据用户的输入获得所有参数
+		QList<GeoPoint*>points = getGeoPoints(layer);
+		QRectF layerRect = layer->getRect();
+		QList<float> populations = getPopulations(points, layer);
+		QString output_file = option->output_file;
+		float output_cell_size = getCellSize(layerRect);
+		float search_radius = getSearchRadius(points, populations, layerRect);
+		int area_unit = option->area_unit;
+		int method = option->method_type;
+		//调用核密度分析函数进行分析
+		float **KDResult = KernelDensity(points, populations, output_cell_size,
+			search_radius, area_unit, method, layerRect);
+		//写入分析结果
+		saveResult(output_file, KDResult, layerRect, output_cell_size);
 	return 0;
 }
 
@@ -81,29 +80,36 @@ float CGeoKernalDensTool::getSearchRadius(QList<GeoPoint*> points, QList<float> 
 {
 	float searchRadius;
 	//如果用户未指定任何内容，则计算默认带宽
-	if (option->search_radius)
+	if (option->search_radius < MINFLOAT)
 	{
 		float SD = 0, Dm = 0, n = 0;
 		float Xsd = 0, Ysd = 0, Xmean = 0, Ymean = 0;
 		float pointNum = points.size();
-		//计算每个要素点到中心点的平均距离Dm、标准距离SD
-		QPointF centerPoint = layerRect.center();
+		//计算平均中心（加权）
 		for (int i = 0; i < pointNum; i++)
 		{
-			Dm += getDis(*points.at(i), centerPoint);
-			Xmean += points.at(i)->getXf();
-			Ymean += points.at(i)->getYf();
-			n += (i + 1)*populations.at(i);
+			Xmean += (points.at(i)->getXf())*populations.at(i);
+			Ymean += (points.at(i)->getYf())*populations.at(i);
 		}
-		Dm = Dm / pointNum;
 		Xmean = Xmean / pointNum;
 		Ymean = Ymean / pointNum;
+		QPointF centerPoint = QPointF(Xmean, Ymean);//加权平均中心
+
+		QList<float> disToCenter;//计算所有点（加权）到平均中心的距离
 		for (int i = 0; i < pointNum; i++)
 		{
+			disToCenter.append(getDis(*points.at(i), centerPoint)*populations.at(i));//此处还要不要加权？
+			n += populations.at(i);//n是点数（没权），population字段的总和（加权）
 			Xsd += pow(points.at(i)->getXf() - Xmean, 2);
 			Ysd += pow(points.at(i)->getYf() - Ymean, 2);
 		}
+		Dm = getMedian(disToCenter);//计算这些距离的中值
 		SD = pow(Xsd*(1 / pointNum) + Ysd * (1 / pointNum), 0.5);
+		float Dm1 = pow(1 / log(2), 0.5)*Dm;
+		float minD = SD;
+		if (minD > Dm1)
+			minD = Dm1;
+		searchRadius = 0.9*minD*pow(n, -0.2);
 	}
 	//如果用户指定内容，则直接返回
 	else
@@ -176,8 +182,8 @@ float ** CGeoKernalDensTool::KernelDensity(QList<GeoPoint*> points, QList<float>
 		LocX[y] = new float[nXSize];
 		for (int x = 0; x < nXSize; x++)
 		{
-			LocX[y][x] = (0.5 + x)*cell_size;
-			LocY[y][x] = (0.5 + y)*cell_size;
+			LocX[y][x] = layerRect.left() + (0.5 + x)*cell_size;
+			LocY[y][x] = layerRect.top() - (0.5 + y)*cell_size;
 		}
 	}
 
@@ -274,6 +280,28 @@ void CGeoKernalDensTool::saveResult(QString output_file,float**KDResult,QRectF l
 void CGeoKernalDensTool::setLayer(GeoLayer * layer1)
 {
 	layer = layer1;
+}
+
+float CGeoKernalDensTool::getMedian(QList<float> nums)
+{
+	float median;
+	float temp;
+	int size = nums.size();
+	//冒泡排序法
+	for (int i = 0; i < size - 1; i++)
+	{
+		for (int j = 0; j < size - 1 - i; j++)
+		{
+			if (nums.at(j) > nums.at(j + 1))
+				nums.swapItemsAt(j, j+1);
+		}
+	}
+	//寻找中值
+	if (size % 2 == 0)
+		median = 0.5*(nums.at(size*0.5) + nums.at(size*0.5 - 1));
+	else
+		median = nums.at(floor(size *0.5));
+	return median;
 }
 
 
