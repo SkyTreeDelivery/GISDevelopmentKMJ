@@ -3,7 +3,8 @@
 #include "util.h"
 
 GeoLayer::GeoLayer():render(NULL),visibility(true), selectMode(EnumType::selectMode::SINGLEMODE),
-dataChangeType(EnumType::dataChangedType::NOCHANGEDATA), indexMode(EnumType::indexMode::QUADTREE)
+dataChangeType(EnumType::dataChangedType::NOCHANGEDATA), indexMode(EnumType::indexMode::QUADTREE),
+globalDefaultColomn("")
 {
 	type = -1;
 }

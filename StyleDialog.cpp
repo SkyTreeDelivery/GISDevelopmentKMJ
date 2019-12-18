@@ -11,12 +11,12 @@ StyleDialog::StyleDialog(GeoLayer* layer, QWidget *parent) :
 	QDialog(parent),layer(layer)
 {
 	QVBoxLayout* layout = new QVBoxLayout();
-	styleTree = new QTreeWidget();
-	layout->addWidget(styleTree);
+	toolTree = new QTreeWidget();
+	layout->addWidget(toolTree);
 	setLayout(layout);
 	resize(500, 200);
 	initTree(layer);
-	connect(styleTree, &QTreeWidget::itemDoubleClicked, this, &StyleDialog::on_item_clicked);
+	connect(toolTree, &QTreeWidget::itemDoubleClicked, this, &StyleDialog::on_item_clicked);
 }
 
 StyleDialog::~StyleDialog()
@@ -27,7 +27,7 @@ StyleDialog::~StyleDialog()
 
 void StyleDialog::initTree(GeoLayer* layer)
 {
-	styleTree->header()->hide();
+	toolTree->header()->hide();
 	int type = layer->getType();
 	if (type == EnumType::POINT) {
 
@@ -45,8 +45,8 @@ void StyleDialog::initTree(GeoLayer* layer)
 		outline = fill->getOutline();
 		QTreeWidgetItem* outline = new QTreeWidgetItem(QStringList() << "outline");
 		QTreeWidgetItem* fill = new QTreeWidgetItem(QStringList() << "fill");
-		styleTree->addTopLevelItem(outline);
-		styleTree->addTopLevelItem(fill);
+		toolTree->addTopLevelItem(outline);
+		toolTree->addTopLevelItem(fill);
 
 		QTreeWidgetItem* outline_color = new QTreeWidgetItem(QStringList() << "color");
 		outline_color->setIcon(0, iconcolor);
@@ -62,7 +62,7 @@ void StyleDialog::initTree(GeoLayer* layer)
 		itemType.insert(fill_color, EnumType::FILLCOLOR);
 		fill->addChild(fill_color);
 
-		styleTree->expandAll();  //必须在之后调用
+		toolTree->expandAll();  //必须在之后调用
 	}
 }
 

@@ -70,21 +70,21 @@ public:
 	void clearSelections();
 	void moveFeatureToTop(GeoFeature* feature);
 private:
-	int type;   //一层只能添加一种数据
-    QList<GeoFeature*> features;
-    Render* render;
+	Render* render;
 	QString name;
 	QString fullpath;
 	bool visibility;
+
+	int type;   //一层只能添加一种数据
+    QList<GeoFeature*> features;
 	int source;  //显示数据的完整url
 	QList<QString> layerAttributeNames;  //属性名列表，暂时替代table的功能
 	QList<GeoFeature*> selectedFeatures;
 	int selectMode;
 	int dataChangeType;
-	//索引
 	int indexMode;//索引模式
 	Index *spatialIndex;
-	QString globalDefaultColomn;
+	QString globalDefaultColomn; //使用NAME作为全局检索的默认属性
 };
 
 #endif // GEOLAYER_H

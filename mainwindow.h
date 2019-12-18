@@ -12,6 +12,7 @@
 #include "SearchWidget.h"
 #include "GlobalSearchWidget.h"
 #include "AttributeTableWidget.h"
+#include "ToolWidget.h"
 namespace Ui {
 class MainWindow;
 }
@@ -42,6 +43,7 @@ private:
 	AttributeTableWidget* attriTableWidget;
 	QTreeWidgetItem* attriTableOldOpenedItem;
 	GlobalSearchWidget* gsw;
+	ToolWidget* tw;
 
 	void initMenuBar();
 	void initRightClickMenu();
@@ -62,6 +64,9 @@ public slots:  //必须声明为slots才行
 
 	//********** search ***************************** 
 	void on_globalSearch_action_triggered();
+
+	//********** toolBox ***************************** 
+	void on_openToolbox_action_triggered();
 
 	//********** filetree rightclick ***************************** 
 	void on_zoomToLayer_action_triggered();

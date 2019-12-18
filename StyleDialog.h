@@ -19,7 +19,7 @@ public:
 
 private:
     Ui::StyleWidget *ui;
-	QTreeWidget* styleTree;
+	QTreeWidget* toolTree;
 	void initTree(GeoLayer* layer);
 	GeoLayer* layer;
 	LineSymbol* outline;

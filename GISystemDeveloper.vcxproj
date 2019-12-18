@@ -222,6 +222,7 @@
     <ClCompile Include="StyleDialog.cpp" />
     <ClCompile Include="Symbol.cpp" />
     <ClCompile Include="TextOutWidget.cpp" />
+    <ClCompile Include="ToolWidget.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -257,6 +258,7 @@
     <QtMoc Include="SearchWidget.h" />
     <ClInclude Include="Symbol.h" />
     <QtMoc Include="TextOutWidget.h" />
+    <QtMoc Include="ToolWidget.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
@@ -285,6 +287,7 @@
     <QtUic Include="postgisDialog.ui" />
     <QtUic Include="SearchWidget.ui" />
     <QtUic Include="TextOutWidget.ui" />
+    <QtUic Include="ToolWidget.ui" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GISystemDeveloper.rc" />
