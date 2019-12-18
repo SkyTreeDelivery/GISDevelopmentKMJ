@@ -72,6 +72,7 @@ GeoLayer* util::openGeoJson(QString path)
 			map->insert(key, QVariant(value));
 		}*/ // 这种方法读不出来170，只能读取字符串形式的"170"
 
+		//添加属性名到layer中
 		QVariantMap attriMap = attrsJ.toVariantMap();
 		QList<QString> keys = attriMap.keys();
 		for (int i = 0; i < keys.size(); i++) {
@@ -165,11 +166,13 @@ GeoLayer * util::openShapeFile(QString path)
 
 	//创建地图对象并添加图层
 	GeoLayer *layer = new GeoLayer;
+	bool hasInitAttriNames = false;
 	QRectF layerRect;
 	layer->setSource(EnumType::source::SHAPEFILE);
 	layer->bindDefaultRender();
 	layer->setFullPath(path);
 	layer->setName(path.mid(path.lastIndexOf("/") + 1, path.lastIndexOf(".") - path.lastIndexOf("/") - 1));
+	layer->setIndexMode(EnumType::indexMode::QUADTREE);
 	//创建图层,只有一个shp文件时，数据全部位于第一个图层上
 	OGRLayer  *poLayer;
 	poLayer = poDS->GetLayer(0);
@@ -189,10 +192,12 @@ GeoLayer * util::openShapeFile(QString path)
 		QMap<QString, QVariant>* attriMap = feature->getAttributeMap();
 		OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
 		int fieldNum = poFDefn->GetFieldCount(); //获得字段的数目，不包括前两个字段（FID,Shape），这两个字段在arcgis里也不能被修改;
+		QList<QString> nameList;
 		for (int fieldi = 0; fieldi < fieldNum; fieldi++)
 		{
 			OGRFieldDefn *poFieldDefn = poFDefn->GetFieldDefn(fieldi);
 			QString attriName(poFieldDefn->GetNameRef());
+			if(!hasInitAttriNames) nameList.push_back(attriName);
 			//根据字段值得类型，选择对应的输出
 			if (poFieldDefn->GetType() == OFTInteger) {
 				QVariant attriValue(poFeature->GetFieldAsInteger(fieldi));
@@ -211,7 +216,10 @@ GeoLayer * util::openShapeFile(QString path)
 				attriMap->insert(attriName, attriValue);
 			}
 		}
-
+		if (!hasInitAttriNames) {
+			layer->setAttributeNames(nameList);
+			hasInitAttriNames = true;
+		}
 		//获取空间位置信息，创建相应的对象并分配存储空间
 		OGRGeometry *poGeometry;
 		poGeometry = poFeature->GetGeometryRef();
@@ -275,6 +283,16 @@ GeoLayer * util::openShapeFile(QString path)
 		}
 		OGRFeature::DestroyFeature(poFeature);
 	}
+	if (layer->getIndexMode() == EnumType::indexMode::GRIDINDEX) {
+		GridIndex* gridIndex = new GridIndex;
+		gridIndex->setGrid(layer->getRect(), layer->getAllFeature());
+		layer->setIndex(gridIndex);
+	}
+	else if (layer->getIndexMode() == EnumType::indexMode::QUADTREE) {
+		QuadTree* quadTree = new QuadTree;
+		quadTree->CreateQuadTree(layer->getRect(), layer->getAllFeature());
+		layer->setIndex(quadTree);
+	}
 	if (layer->size()) {
 		return layer;
 	}
@@ -284,10 +302,12 @@ GeoLayer * util::openShapeFile(QString path)
 GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 {
 	GeoLayer* layer = new GeoLayer;
+	bool hasInitAttriNames = false;
 	layer->bindDefaultRender();
 	layer->setFullPath(path);
 	layer->setName(layername);
 	layer->setSource(EnumType::source::POSTGRESQL);
+	layer->setIndexMode(EnumType::indexMode::QUADTREE);
 	const char *filePath;
 	QByteArray baPath = path.toLatin1();
 	filePath = baPath.data();
@@ -325,10 +345,12 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 		QMap<QString, QVariant>* attriMap = feature->getAttributeMap();
 		OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
 		int fieldNum = poFDefn->GetFieldCount(); //获得字段的数目，不包括前两个字段（FID,Shape），这两个字段在arcgis里也不能被修改;
+		QList<QString> nameList;
 		for (int fieldi = 0; fieldi < fieldNum; fieldi++)
 		{
 			OGRFieldDefn *poFieldDefn = poFDefn->GetFieldDefn(fieldi);
 			QString attriName(poFieldDefn->GetNameRef());
+			if (!hasInitAttriNames) nameList.push_back(attriName);
 			//根据字段值得类型，选择对应的输出
 			if (poFieldDefn->GetType() == OFTInteger) {
 				QVariant attriValue(poFeature->GetFieldAsInteger(fieldi));
@@ -346,6 +368,10 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 				QVariant attriValue(poFeature->GetFieldAsString(fieldi));
 				attriMap->insert(attriName, attriValue);
 			}
+		}
+		if (!hasInitAttriNames) {
+			layer->setAttributeNames(nameList);
+			hasInitAttriNames = true;
 		}
 		//获取空间位置信息，创建相应的对象并分配存储空间
 		//在postgis中，都是multi的要素！！！
@@ -433,7 +459,16 @@ GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 		else
 			OGRFeature::DestroyFeature(poFeature);
 	}
-
+	if (layer->getIndexMode() == EnumType::indexMode::GRIDINDEX) {
+		GridIndex* gridIndex = new GridIndex;
+		gridIndex->setGrid(layer->getRect(), layer->getAllFeature());
+		layer->setIndex(gridIndex);
+	}
+	else if (layer->getIndexMode() == EnumType::indexMode::QUADTREE) {
+		QuadTree* quadTree = new QuadTree;
+		quadTree->CreateQuadTree(layer->getRect(), layer->getAllFeature());
+		layer->setIndex(quadTree);
+	}
 	if (layer->size()) {
 		return layer;
 	}

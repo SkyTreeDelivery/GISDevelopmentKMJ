@@ -22,7 +22,10 @@ private:
 	QTreeWidget* toolTree;
 	void initTree(GeoLayer* layer);
 	GeoLayer* layer;
-	LineSymbol* outline;
+	MarkerSymbol* marker;
+	LineSymbol* marker_line;
+	LineSymbol* line;
+	LineSymbol* fill_outline;
 	FillSymbol* fill;
 	QMap<QTreeWidgetItem*, int> itemType;
 signals:

@@ -30,10 +30,52 @@ void StyleDialog::initTree(GeoLayer* layer)
 	toolTree->header()->hide();
 	int type = layer->getType();
 	if (type == EnumType::POINT) {
+		QIcon iconcolor, iconwidth;
+		iconcolor.addFile("img/fill.png");
+		iconwidth.addFile("img/line.png");
 
+		marker = layer->getRender()->getMarkerSymbol();
+		marker_line = marker->getOutline();
+		QTreeWidgetItem* outlineItem = new QTreeWidgetItem(QStringList() << "outline");
+		QTreeWidgetItem* fillItem = new QTreeWidgetItem(QStringList() << "fill");
+		toolTree->addTopLevelItem(outlineItem);
+		toolTree->addTopLevelItem(fillItem);
+
+		QTreeWidgetItem* outline_color = new QTreeWidgetItem(QStringList() << "color");
+		outline_color->setIcon(0, iconcolor);
+		QTreeWidgetItem* outline_width = new QTreeWidgetItem(QStringList() << "width");
+		outline_width->setIcon(0, iconwidth);
+		itemType.insert(outline_color, EnumType::styleType::LINECOLOR);
+		itemType.insert(outline_width, EnumType::styleType::LINEWIDTH);
+		outlineItem->addChild(outline_color);
+		outlineItem->addChild(outline_width);
+
+		QTreeWidgetItem* fill_color = new QTreeWidgetItem(QStringList() << "color");
+		fill_color->setIcon(0, iconcolor);
+		itemType.insert(fill_color, EnumType::styleType::MARKETCOLOR);
+		fillItem->addChild(fill_color);
+
+		toolTree->expandAll();  //必须在之后调用
 	}
 	else if (type == EnumType::POLYLINE) {
+		QIcon iconcolor, iconwidth;
+		iconcolor.addFile("img/fill.png");
+		iconwidth.addFile("img/line.png");
 
+		line = layer->getRender()->getLineSymbol();
+		QTreeWidgetItem* lineItem = new QTreeWidgetItem(QStringList() << "line");
+		toolTree->addTopLevelItem(lineItem);
+
+		QTreeWidgetItem* line_color = new QTreeWidgetItem(QStringList() << "color");
+		line_color->setIcon(0, iconcolor);
+		QTreeWidgetItem* line_width = new QTreeWidgetItem(QStringList() << "width");
+		line_width->setIcon(0, iconwidth);
+		itemType.insert(line_color, EnumType::LINECOLOR);
+		itemType.insert(line_width, EnumType::styleType::LINEWIDTH);
+		lineItem->addChild(line_color);
+		lineItem->addChild(line_width);
+
+		toolTree->expandAll();  //必须在之后调用
 	}
 	else if (type == EnumType::POLYGON) {
 
@@ -42,56 +84,91 @@ void StyleDialog::initTree(GeoLayer* layer)
 		iconwidth.addFile("img/line.png");
 
 		fill = layer->getRender()->getFillSymbol();
-		outline = fill->getOutline();
-		QTreeWidgetItem* outline = new QTreeWidgetItem(QStringList() << "outline");
-		QTreeWidgetItem* fill = new QTreeWidgetItem(QStringList() << "fill");
-		toolTree->addTopLevelItem(outline);
-		toolTree->addTopLevelItem(fill);
+		fill_outline = fill->getOutline();
+		QTreeWidgetItem* outlineItem = new QTreeWidgetItem(QStringList() << "outline");
+		QTreeWidgetItem* fillItem = new QTreeWidgetItem(QStringList() << "fill");
+		toolTree->addTopLevelItem(outlineItem);
+		toolTree->addTopLevelItem(fillItem);
 
 		QTreeWidgetItem* outline_color = new QTreeWidgetItem(QStringList() << "color");
 		outline_color->setIcon(0, iconcolor);
 		QTreeWidgetItem* outline_width = new QTreeWidgetItem(QStringList() << "width");
 		outline_width->setIcon(0, iconwidth);
-		itemType.insert(outline_color, EnumType::LINECOLOR);
-		itemType.insert(outline_width, EnumType::LINEWIDTH);
-		outline->addChild(outline_color);
-		outline->addChild(outline_width);
+		itemType.insert(outline_color, EnumType::styleType::LINECOLOR);
+		itemType.insert(outline_width, EnumType::styleType::LINEWIDTH);
+		outlineItem->addChild(outline_color);
+		outlineItem->addChild(outline_width);
 
 		QTreeWidgetItem* fill_color = new QTreeWidgetItem(QStringList() << "color");
 		fill_color->setIcon(0, iconcolor);
-		itemType.insert(fill_color, EnumType::FILLCOLOR);
-		fill->addChild(fill_color);
+		itemType.insert(fill_color, EnumType::styleType::FILLCOLOR);
+		fillItem->addChild(fill_color);
 
 		toolTree->expandAll();  //必须在之后调用
 	}
 }
 
 void StyleDialog::on_item_clicked(QTreeWidgetItem* item) {
+	int featureType = layer->getType();
 	if (itemType.contains(item)) {
 		int type = itemType[item];   //itemType[item] 这种方式必须要使得item在itemtype，如不在map中，会自动添加一个默认的值给value，需要先判断是否包含
-		if (type == EnumType::LINECOLOR) {
-			QColor result = QColorDialog::getColor(outline->getColor(), this, "line color");
+		if (featureType == EnumType::POLYGON && type == EnumType::LINECOLOR) {
+			QColor result = QColorDialog::getColor(fill_outline->getColor(), this, "line color");
 			if (result.isValid()) {
-				outline->setColor(result);
+				fill_outline->setColor(result);
 				emit renderLayerSignal(layer);
 			}
 		}
-		else if (type == EnumType::FILLCOLOR) {
+		else if (featureType == EnumType::POLYGON && type == EnumType::FILLCOLOR) {
 			QColor result = QColorDialog::getColor(fill->getColor(), this, "fill color");
 			if (result.isValid()) {
 				fill->setColor(result);
 				emit renderLayerSignal(layer);
 			}
 		}
-		else if (type == EnumType::LINEWIDTH) {
-			LinewidthDialog dialog(outline->getWidth());
+		else if (featureType == EnumType::POLYGON && type == EnumType::LINEWIDTH) {
+			LinewidthDialog dialog(fill_outline->getWidth());
 			int result = dialog.exec();
 			if (result == QDialog::Accepted) {
-				outline->setWidth(dialog.getWidth());
+				fill_outline->setWidth(dialog.getWidth());
 				emit renderLayerSignal(layer);
 			}
-			else if (result == QDialog::Rejected) {
-
+		}
+		else if (featureType == EnumType::POINT && type == EnumType::LINECOLOR) {
+			QColor result = QColorDialog::getColor(marker_line->getColor(), this, "line color");
+			if (result.isValid()) {
+				marker_line->setColor(result);
+				emit renderLayerSignal(layer);
+			}
+		}
+		else if (featureType == EnumType::POINT && type == EnumType::FILLCOLOR) {
+			QColor result = QColorDialog::getColor(marker->getColor(), this, "fill color");
+			if (result.isValid()) {
+				marker->setColor(result);
+				emit renderLayerSignal(layer);
+			}
+		}
+		else if (featureType == EnumType::POINT && type == EnumType::LINEWIDTH) {
+			LinewidthDialog dialog(marker_line->getWidth());
+			int result = dialog.exec();
+			if (result == QDialog::Accepted) {
+				marker_line->setWidth(dialog.getWidth());
+				emit renderLayerSignal(layer);
+			}
+		}
+		else if (featureType == EnumType::POLYLINE && type == EnumType::LINECOLOR) {
+			QColor result = QColorDialog::getColor(line->getColor(), this, "line color");
+			if (result.isValid()) {
+				line->setColor(result);
+				emit renderLayerSignal(layer);
+			}
+		}
+		else if (featureType == EnumType::POLYLINE && type == EnumType::LINEWIDTH) {
+			LinewidthDialog dialog(line->getWidth());
+			int result = dialog.exec();
+			if (result == QDialog::Accepted) {
+				line->setWidth(dialog.getWidth());
+				emit renderLayerSignal(layer);
 			}
 		}
 	}
