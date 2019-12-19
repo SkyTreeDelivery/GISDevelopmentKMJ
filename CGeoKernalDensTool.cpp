@@ -5,6 +5,7 @@ CGeoKernalDensTool::CGeoKernalDensTool()
 	GDALAllRegister();//注册所有驱动
 	OGRRegisterAll();
 	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");//支持中文路径
+	this->type = EnumType::KERNEL_DENSITY_ANALYSIS;
 }
 
 CGeoKernalDensTool::~CGeoKernalDensTool()
@@ -17,16 +18,19 @@ GeoLayer* CGeoKernalDensTool::run_tool()
 	QList<GeoPoint*>points = getGeoPoints(layer);
 	QRectF layerRect = layer->getRect();
 	QList<float> populations = getPopulations(points, layer);
-	QString output_file = option->output_file;
-	float output_cell_size = getCellSize(layerRect);
-	float search_radius = getSearchRadius(points, populations, layerRect);
-	int area_unit = option->area_unit;
-	int method = option->method_type;
-	//调用核密度分析函数进行分析
-	float **KDResult = KernelDensity(points, populations, output_cell_size,
-		search_radius, area_unit, method, layerRect);
-	//写入分析结果
-	saveResult(output_file, KDResult, layerRect, output_cell_size);
+	if (option->getToolType() == EnumType::KERNEL_DENSITY_ANALYSIS) {
+		COption* option = (COption*)option;
+		QString output_file = option->output_file;
+		float output_cell_size = getCellSize(layerRect);
+		float search_radius = getSearchRadius(points, populations, layerRect);
+		int area_unit = option->area_unit;
+		int method = option->method_type;
+		//调用核密度分析函数进行分析
+		float **KDResult = KernelDensity(points, populations, output_cell_size,
+			search_radius, area_unit, method, layerRect);
+		//写入分析结果
+		saveResult(output_file, KDResult, layerRect, output_cell_size);
+	}
 	return NULL;
 }
 
@@ -51,25 +55,28 @@ QList<float> CGeoKernalDensTool::getPopulations(QList<GeoPoint*> points,GeoLayer
 {
 	QList<float> populations;
 	//如果用户未指定population字段，则将population全部赋值为1
-	QString field = option->population_field;
-	if (option->population_field.isNull())
-	{
-		for (int i = 0; i < points.size(); i++)
-			populations.append(1.0f);
-	}
-	else
-	{
-		QList<QString> attris = layer->getAttributeNames();
-		int attriNum = attris.size();
-		for (int j = 0; j < points.size(); j++)//遍历所有要素
-		{	
-			QVariant var=layer->getFeatureAt(j)->getAttributeMap()->value(option->population_field);
-			if (var.toFloat()>MINFLOAT)
-				populations.append(var.toFloat());
-			else
+	if (option->getToolType() == EnumType::KERNEL_DENSITY_ANALYSIS) {
+		COption* option = (COption*)option;
+		QString field = option->population_field;
+		if (option->population_field.isNull())
+		{
+			for (int i = 0; i < points.size(); i++)
+				populations.append(1.0f);
+		}
+		else
+		{
+			QList<QString> attris = layer->getAttributeNames();
+			int attriNum = attris.size();
+			for (int j = 0; j < points.size(); j++)//遍历所有要素
 			{
-				QMessageBox::critical(NULL, "Input Error", "Population Field Input Error", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-				exit(0);
+				QVariant var = layer->getFeatureAt(j)->getAttributeMap()->value(option->population_field);
+				if (var.toFloat() > MINFLOAT)
+					populations.append(var.toFloat());
+				else
+				{
+					QMessageBox::critical(NULL, "Input Error", "Population Field Input Error", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+					exit(0);
+				}
 			}
 		}
 	}
@@ -80,40 +87,44 @@ float CGeoKernalDensTool::getSearchRadius(QList<GeoPoint*> points, QList<float> 
 {
 	float searchRadius;
 	//如果用户未指定任何内容，则计算默认带宽
-	if (option->search_radius < MINFLOAT)
-	{
-		float SD = 0, Dm = 0, n = 0;
-		float Xsd = 0, Ysd = 0, Xmean = 0, Ymean = 0;
-		float pointNum = points.size();
-		//计算平均中心（加权）
-		for (int i = 0; i < pointNum; i++)
+	if (option->getToolType() == EnumType::KERNEL_DENSITY_ANALYSIS) {
+		COption* option = (COption*)option;
+		if (option->search_radius < MINFLOAT)
 		{
-			Xmean += (points.at(i)->getXf())*populations.at(i);
-			Ymean += (points.at(i)->getYf())*populations.at(i);
-		}
-		Xmean = Xmean / pointNum;
-		Ymean = Ymean / pointNum;
-		QPointF centerPoint = QPointF(Xmean, Ymean);//加权平均中心
+			float SD = 0, Dm = 0, n = 0;
+			float Xsd = 0, Ysd = 0, Xmean = 0, Ymean = 0;
+			float pointNum = points.size();
+			//计算平均中心（加权）
+			for (int i = 0; i < pointNum; i++)
+			{
+				Xmean += (points.at(i)->getXf())*populations.at(i);
+				Ymean += (points.at(i)->getYf())*populations.at(i);
+			}
+			Xmean = Xmean / pointNum;
+			Ymean = Ymean / pointNum;
+			QPointF centerPoint = QPointF(Xmean, Ymean);//加权平均中心
 
-		QList<float> disToCenter;//计算所有点（加权）到平均中心的距离
-		for (int i = 0; i < pointNum; i++)
-		{
-			disToCenter.append(getDis(*points.at(i), centerPoint)*populations.at(i));//此处还要不要加权？
-			n += populations.at(i);//n是点数（没权），population字段的总和（加权）
-			Xsd += pow(points.at(i)->getXf() - Xmean, 2);
-			Ysd += pow(points.at(i)->getYf() - Ymean, 2);
+			QList<float> disToCenter;//计算所有点（加权）到平均中心的距离
+			for (int i = 0; i < pointNum; i++)
+			{
+				disToCenter.append(getDis(*points.at(i), centerPoint)*populations.at(i));//此处还要不要加权？
+				n += populations.at(i);//n是点数（没权），population字段的总和（加权）
+				Xsd += pow(points.at(i)->getXf() - Xmean, 2);
+				Ysd += pow(points.at(i)->getYf() - Ymean, 2);
+			}
+			Dm = getMedian(disToCenter);//计算这些距离的中值
+			SD = pow(Xsd*(1 / pointNum) + Ysd * (1 / pointNum), 0.5);
+			float Dm1 = pow(1 / log(2), 0.5)*Dm;
+			float minD = SD;
+			if (minD > Dm1)
+				minD = Dm1;
+			searchRadius = 0.9*minD*pow(n, -0.2);
 		}
-		Dm = getMedian(disToCenter);//计算这些距离的中值
-		SD = pow(Xsd*(1 / pointNum) + Ysd * (1 / pointNum), 0.5);
-		float Dm1 = pow(1 / log(2), 0.5)*Dm;
-		float minD = SD;
-		if (minD > Dm1)
-			minD = Dm1;
-		searchRadius = 0.9*minD*pow(n, -0.2);
+		//如果用户指定内容，则直接返回
+		else {
+			searchRadius = option->search_radius;
+		}
 	}
-	//如果用户指定内容，则直接返回
-	else
-		searchRadius = option->search_radius;
 	return searchRadius;
 }
 
@@ -121,16 +132,20 @@ float CGeoKernalDensTool::getCellSize(QRectF layerRect)
 {
 	float cellSize;
 	//如果用户未指定任何内容，则象元大小会通过使用范围的宽度或高度中的较小值除以250来计算
-	if (option->output_cell_size<MINFLOAT)
-	{
-		float min = abs(layerRect.height());
-		if (min > abs(layerRect.width()))
-			min = abs(layerRect.width());
-		cellSize = min / 205;
+	if (option->getToolType() == EnumType::KERNEL_DENSITY_ANALYSIS) {
+		COption* option = (COption*)option;
+		if (option->output_cell_size < MINFLOAT)
+		{
+			float min = abs(layerRect.height());
+			if (min > abs(layerRect.width()))
+				min = abs(layerRect.width());
+			cellSize = min / 205;
+		}
+		//如果用户指定内容，则直接返回
+		else {
+			cellSize = option->output_cell_size;
+		}
 	}
-	//如果用户指定内容，则直接返回
-	else
-		cellSize = option->output_cell_size;
 	return cellSize;
 }
 
@@ -139,20 +154,23 @@ float CGeoKernalDensTool::getDis(GeoPoint pt1, QPointF pt2)
 	float dis;
 	float R = 6378137;
 	//如果method_type为0则使用平面距离
-	if (option->method_type == 0)
-	{
-		float dx = pt1.getXf() - pt2.x();
-		float dy = pt1.getYf() - pt2.y();
-		dis = pow(dx * dx + dy * dy, 0.5);
-	}
-	//如果method_type为1则使用大地线距离
-	else if (option->method_type == 1)
-	{
-		float dB = (pt1.getYf() - pt2.x())*PI / 180;
-		float dL = (pt1.getXf() - pt2.y())*PI / 180;
-		float a = sinf(dL / 2)*sinf(dB / 2) + cosf(pt1.getXf()*PI / 180)*cosf(pt2.x()*PI / 180)*sinf(dL / 2)*sinf(dL / 2);
-		float c = 2 * atan2f(pow(a, 0.5), pow((1 - a), 0.5));
-		dis = R * c;
+	if (option->getToolType() == EnumType::KERNEL_DENSITY_ANALYSIS) {
+		COption* option = (COption*)option;
+		if (option->method_type == 0)
+		{
+			float dx = pt1.getXf() - pt2.x();
+			float dy = pt1.getYf() - pt2.y();
+			dis = pow(dx * dx + dy * dy, 0.5);
+		}
+		//如果method_type为1则使用大地线距离
+		else if (option->method_type == 1)
+		{
+			float dB = (pt1.getYf() - pt2.x())*PI / 180;
+			float dL = (pt1.getXf() - pt2.y())*PI / 180;
+			float a = sinf(dL / 2)*sinf(dB / 2) + cosf(pt1.getXf()*PI / 180)*cosf(pt2.x()*PI / 180)*sinf(dL / 2)*sinf(dL / 2);
+			float c = 2 * atan2f(pow(a, 0.5), pow((1 - a), 0.5));
+			dis = R * c;
+		}
 	}
 	return dis;
 }
@@ -187,49 +205,52 @@ float ** CGeoKernalDensTool::KernelDensity(QList<GeoPoint*> points, QList<float>
 		}
 	}
 
-	if (option->method_type == 0)//输出值表示预测的密度值。这是默认设置。
-	{
-		//计算每一个栅格的数值,point的顺序与population的顺序一致
-		int pointNum = points.size();
-		for (int y = 0; y < nYSize; y++)
+	if (option->getToolType() == EnumType::KERNEL_DENSITY_ANALYSIS) {
+		COption* option = (COption*)option;
+		if (option->method_type == 0)//输出值表示预测的密度值。这是默认设置。
 		{
-			for (int x = 0; x < nXSize; x++)
+			//计算每一个栅格的数值,point的顺序与population的顺序一致
+			int pointNum = points.size();
+			for (int y = 0; y < nYSize; y++)
 			{
-				QPointF gridPoint(LocX[y][x], LocY[y][x]);
-				QList<float>pops;
-				QList<float>dists;
-				float pop, dist;
-				for (int i = 0; i < pointNum; i++)//遍历每一个要素点，若在搜索半径范围内，则加入
+				for (int x = 0; x < nXSize; x++)
 				{
-					dist = getDis(*points.at(i), gridPoint);
-					pop = populations.at(i);
-					if (dist < search_radius)
+					QPointF gridPoint(LocX[y][x], LocY[y][x]);
+					QList<float>pops;
+					QList<float>dists;
+					float pop, dist;
+					for (int i = 0; i < pointNum; i++)//遍历每一个要素点，若在搜索半径范围内，则加入
 					{
-						pops.append(pop);
-						dists.append(dist);
+						dist = getDis(*points.at(i), gridPoint);
+						pop = populations.at(i);
+						if (dist < search_radius)
+						{
+							pops.append(pop);
+							dists.append(dist);
+						}
 					}
+					KDResult[y][x] = getDensity(search_radius, pops, dists);
 				}
-				KDResult[y][x] = getDensity(search_radius, pops, dists);
 			}
 		}
-	}
-	else if (option->method_type == 1)//输出值表示每个像元中预测的现象数量。
-	{
-		int pointNum = points.size();
-		for (int y = 0; y < nYSize; y++)
+		else if (option->method_type == 1)//输出值表示每个像元中预测的现象数量。
 		{
-			for (int x = 0; x < nXSize; x++)
+			int pointNum = points.size();
+			for (int y = 0; y < nYSize; y++)
 			{
-				QPointF gridPoint(LocX[y][x], LocY[y][x]);
-				float count;
-				float dist;
-				for (int i = 0; i < pointNum; i++)//遍历每一个要素点，若在搜索半径范围内，则加入
+				for (int x = 0; x < nXSize; x++)
 				{
-					dist = getDis(*points.at(i), gridPoint);
-					if (dist < search_radius)
-						count++;
+					QPointF gridPoint(LocX[y][x], LocY[y][x]);
+					float count;
+					float dist;
+					for (int i = 0; i < pointNum; i++)//遍历每一个要素点，若在搜索半径范围内，则加入
+					{
+						dist = getDis(*points.at(i), gridPoint);
+						if (dist < search_radius)
+							count++;
+					}
+					KDResult[y][x] = count;
 				}
-				KDResult[y][x] = count;
 			}
 		}
 	}

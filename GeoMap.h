@@ -16,11 +16,14 @@ public:
 	QList<GeoLayer*> removeAll();
 	int getIdx(GeoLayer* layer);
 	void removeByFullpath(QString fullpath);
+	GeoLayer* getCurrentLayer();
+	void setCurrentLayer(GeoLayer* layer);
 	int size();
 	void moveLayerLevel(int from, int to);
 
 private:
     QList<GeoLayer*> layers;
+	GeoLayer* currentLayer;
 };
 
 #endif // GEOMAP_H

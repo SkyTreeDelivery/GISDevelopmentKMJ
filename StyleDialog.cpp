@@ -35,20 +35,20 @@ void StyleDialog::initTree(GeoLayer* layer)
 		iconwidth.addFile("img/line.png");
 
 		marker = layer->getRender()->getMarkerSymbol();
-		marker_line = marker->getOutline();
-		QTreeWidgetItem* outlineItem = new QTreeWidgetItem(QStringList() << "outline");
+		//marker_line = marker->getOutline();
+		/*QTreeWidgetItem* outlineItem = new QTreeWidgetItem(QStringList() << "outline");
+		toolTree->addTopLevelItem(outlineItem);*/
 		QTreeWidgetItem* fillItem = new QTreeWidgetItem(QStringList() << "fill");
-		toolTree->addTopLevelItem(outlineItem);
 		toolTree->addTopLevelItem(fillItem);
 
-		QTreeWidgetItem* outline_color = new QTreeWidgetItem(QStringList() << "color");
+		/*QTreeWidgetItem* outline_color = new QTreeWidgetItem(QStringList() << "color");
 		outline_color->setIcon(0, iconcolor);
 		QTreeWidgetItem* outline_width = new QTreeWidgetItem(QStringList() << "width");
 		outline_width->setIcon(0, iconwidth);
 		itemType.insert(outline_color, EnumType::styleType::LINECOLOR);
 		itemType.insert(outline_width, EnumType::styleType::LINEWIDTH);
 		outlineItem->addChild(outline_color);
-		outlineItem->addChild(outline_width);
+		outlineItem->addChild(outline_width);*/
 
 		QTreeWidgetItem* marker_color = new QTreeWidgetItem(QStringList() << "color");
 		marker_color->setIcon(0, iconcolor);
@@ -138,13 +138,13 @@ void StyleDialog::on_item_clicked(QTreeWidgetItem* item) {
 				emit renderLayerSignal(layer);
 			}
 		}
-		else if (featureType == EnumType::POINT && type == EnumType::LINECOLOR) {
+		/*else if (featureType == EnumType::POINT && type == EnumType::LINECOLOR) {
 			QColor result = QColorDialog::getColor(marker_line->getColor(), this, "point outline color");
 			if (result.isValid()) {
 				marker_line->setColor(result);
 				emit renderLayerSignal(layer);
 			}
-		}
+		}*/
 		else if (featureType == EnumType::POINT && type == EnumType::MARKETCOLOR) {
 			QColor result = QColorDialog::getColor(marker->getColor(), this, "point color");
 			if (result.isValid()) {

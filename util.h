@@ -35,6 +35,7 @@ public:
 	static QColor parseColor(QString hexNamedColor);  //使用qcolor方便很多，不用自己解析了
 	static void tesselation(GeoPolygon* polygon, gpc_tristrip* tristrip);
 	static QList<GeoFeature*> search(GeoLayer * layer, QString attriName, QString attriValue);
+	static GeoFeature * identify(GeoPoint * point, GeoLayer * layer, float threshold,Index* spatialIndex);
 	static QList<GeoFeature*> globalSearch(GeoMap * map, QString attriValue);
 };
 

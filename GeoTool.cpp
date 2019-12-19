@@ -8,12 +8,17 @@ GeoTool::~GeoTool()
 {
 }
 
-void GeoTool::setOption(COption * opt)
+void GeoTool::setOption(Option * opt)
 {
 	option = opt;
 }
 
-COption* GeoTool::getOption()
+Option* GeoTool::getOption()
 {
 	return option;
+}
+
+int GeoTool::getToolType()
+{
+	return type;
 }

@@ -68,6 +68,16 @@ void GeoMap::removeByFullpath(QString fullpath)
 	removeLayerAt(getIdx(getLayerByFullpath(fullpath)));
 }
 
+GeoLayer * GeoMap::getCurrentLayer()
+{
+	return currentLayer;
+}
+
+void GeoMap::setCurrentLayer(GeoLayer * layer)
+{
+	this->currentLayer = layer;
+}
+
 int GeoMap::size()
 {
 	return layers.size();

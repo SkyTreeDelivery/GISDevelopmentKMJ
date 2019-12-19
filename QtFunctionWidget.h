@@ -40,7 +40,7 @@ private:
 	QMap<GeoFeature*, QList<QOpenGLVertexArrayObject*>*> featureVaosMap;
 	QMap<GeoLayer*, QList<QOpenGLBuffer*>*> layerBosMap;
 
-	GeoLayer* currentLayer; //储存当前图层，对影响,用于显示与操作
+	GeoLayer* currentLayer; //储存当前图层，对影响,用于显示与操作，warning：不要直接改动currentlayer，要通过switchLayer改动，以保证map中的currentlayer与此变量同步
 	//GeoLayer* tempProcessLayer; //用于处理数据读入配置的中转图层
 	QList<GeoLayer*> waitLoadedLayers;
 

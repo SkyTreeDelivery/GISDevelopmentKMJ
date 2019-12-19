@@ -52,6 +52,12 @@ void QtFunctionWidget::initializeGL(){
         qDebug() << "shaderProgram link failed!" << shaderProgram.log();
     }
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);  //必须先设置为enable才能设置点的size，是个坑
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST); // Make round points, not square points
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);  // Antialias the lines
+	glEnable(GL_BLEND); //启用色彩混合
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void QtFunctionWidget::resizeGL(int w, int h){
@@ -244,11 +250,11 @@ void QtFunctionWidget::initLayer(GeoLayer* layer)
 {
 	if(!isExist(layer)){  //第一次加载
 		map->addLayer(layer);
-		currentLayer = layer;
+		switchLayer(layer);
 		bindVaos(layer);
 	}
 	else {  //更新数据
-		currentLayer = layer;
+		switchLayer(layer);
 		if (layer->getDataChangedType() != EnumType::dataChangedType::NOCHANGEDATA) {
 			switch (layer->getDataChangedType())
 			{
@@ -281,6 +287,7 @@ void QtFunctionWidget::switchLayer(GeoLayer* layer)
 {
 	if(isExist(layer)){
 		currentLayer = layer;
+		map->setCurrentLayer(layer);
 	}
 }
 void QtFunctionWidget::switchLayer(QString fullpath)
@@ -616,7 +623,7 @@ void QtFunctionWidget::mousePressEvent(QMouseEvent *e)
 	if(e->button() == Qt::LeftButton){   //左键
 		if (operateMode == EnumType::operateMode::IDENTIFY) {
 			QPointF worldPoint = screenToWorld(e->pos());
-			GeoFeature* feature = currentLayer->identify(&GeoPoint(worldPoint), currentLayer, worldRect.width()/10);
+			GeoFeature* feature = currentLayer->identify(&GeoPoint(worldPoint), worldRect.width()/10);
 			if (feature) {
 				currentLayer->selectFeature(feature);
 				if (hasTableShowing) {
@@ -921,7 +928,7 @@ void QtFunctionWidget::initWorldRect(QRectF rect)
 		layerWidth = abs(layerHeight*viewRadio);
 	}
 	QPointF leftTop(center.x() - layerWidth * 1.0 / 2, center.y() - layerHeight * 1.0 / 2);
-	worldRect = QRectF(leftTop, QSize(layerWidth, layerHeight));
+	worldRect = QRectF(leftTop, QSizeF(layerWidth, layerHeight));
 }
 
 //TODO 判断resize的拉伸方向

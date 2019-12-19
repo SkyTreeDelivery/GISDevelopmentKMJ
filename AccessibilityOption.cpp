@@ -2,8 +2,9 @@
 
 
 
-AccessibilityOption::AccessibilityOption()
+AccessibilityOption::AccessibilityOption():useSelectedFeatures(false)
 {
+	this->type = EnumType::ACCESSIBILITY_ANALYSIS;
 }
 
 
@@ -11,24 +12,25 @@ AccessibilityOption::~AccessibilityOption()
 {
 }
 
-void AccessibilityOption::setStartPoint(GeoPoint * point)
+void AccessibilityOption::setOriLayer(GeoLayer * layer)
 {
-	this->startPoint = point;
+	this->oriPointLayer = layer;
 }
 
-GeoPoint * AccessibilityOption::getStartPoint()
+GeoLayer * AccessibilityOption::getOriginPointLayer()
 {
-	return startPoint;
+	return oriPointLayer;
+	return oriPointLayer;
 }
 
-void AccessibilityOption::setTargetPointLayer(GeoLayer * layer)
+void AccessibilityOption::setDirPointLayer(GeoLayer * layer)
 {
-	targetPointLayer = layer;
+	dirPointLayer = layer;
 }
 
-GeoLayer * AccessibilityOption::getTargetPointLayer()
+GeoLayer * AccessibilityOption::getDirPointLayer()
 {
-	return targetPointLayer;
+	return dirPointLayer;
 }
 
 void AccessibilityOption::setArcLayer(GeoLayer * layer)
@@ -41,14 +43,24 @@ GeoLayer * AccessibilityOption::getArcLayer()
 	return arcLayer;
 }
 
-void AccessibilityOption::setNoteLayer(GeoLayer * layer)
+void AccessibilityOption::setNodeLayer(GeoLayer * layer)
 {
-	noteLayer = layer;
+	nodeLayer = layer;
 }
 
-GeoLayer * AccessibilityOption::getNoteLayer()
+GeoLayer * AccessibilityOption::getNodeLayer()
 {
-	return arcLayer;
+	return nodeLayer;
+}
+
+QString AccessibilityOption::getSaveField()
+{
+	return saveField;
+}
+
+void AccessibilityOption::setSaveField(QString field)
+{
+	saveField = field;
 }
 
 void AccessibilityOption::setTimeLimit(float time)
@@ -59,4 +71,14 @@ void AccessibilityOption::setTimeLimit(float time)
 float AccessibilityOption::getTimeLimit()
 {
 	return timeLimit;
+}
+
+bool AccessibilityOption::getUseSelectedFeatures()
+{
+	return useSelectedFeatures;
+}
+
+void AccessibilityOption::setUseSelectedFeatures(bool flag)
+{
+	useSelectedFeatures = flag;
 }

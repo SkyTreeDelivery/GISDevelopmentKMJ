@@ -533,6 +533,18 @@ QList<GeoFeature*> util::search(GeoLayer * layer, QString attriName, QString att
 	return featuresFound;
 }
 
+GeoFeature * util::identify(GeoPoint * point, GeoLayer * layer, float threshold, Index * spatialIndex)
+{
+	GeoFeature *featureFound;
+	if (layer->getIndexMode() == EnumType::GRIDINDEX) {
+		featureFound = static_cast<GridIndex*>(spatialIndex)->searchGrid(point, threshold);
+	}
+	else if (layer->getIndexMode() == EnumType::QUADTREE) {
+		featureFound = static_cast<QuadTree*>(spatialIndex)->SearchQuadTree(point, threshold);
+	}
+	return featureFound;
+}
+
 QList<GeoFeature*> util::globalSearch(GeoMap * map, QString attriValue)
 {
 	QList<GeoFeature*> features;

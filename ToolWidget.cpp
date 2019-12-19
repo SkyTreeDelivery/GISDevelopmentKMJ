@@ -35,7 +35,7 @@ void ToolWidget::initToolTree()
 	QTreeWidgetItem* aa = new QTreeWidgetItem(QStringList() << QStringLiteral("可达性分析") << "(Accessibility analysis)");
 	spatialToolBox->addChild(nda);
 	spatialToolBox->addChild(aa);
-	nda->setData(0, Qt::WhatsThisRole, QVariant(EnumType::sparitalAnalysisTool::NUCLEAR_DENSITY_ANALYSIS));
+	nda->setData(0, Qt::WhatsThisRole, QVariant(EnumType::sparitalAnalysisTool::KERNEL_DENSITY_ANALYSIS));
 	aa->setData(0, Qt::WhatsThisRole, QVariant(EnumType::sparitalAnalysisTool::ACCESSIBILITY_ANALYSIS));
 	connect(toolTree, &QTreeWidget::itemDoubleClicked, this, &ToolWidget::on_item_clicked);
 
@@ -46,7 +46,7 @@ void ToolWidget::initToolTree()
 void ToolWidget::on_item_clicked(QTreeWidgetItem* item)
 {
 	int toolType = item->data(0, Qt::WhatsThisRole).toInt();
-	if (toolType == EnumType::sparitalAnalysisTool::NUCLEAR_DENSITY_ANALYSIS) { //核密度
+	if (toolType == EnumType::sparitalAnalysisTool::KERNEL_DENSITY_ANALYSIS) { //核密度
 
 	}
 	else if (toolType == EnumType::sparitalAnalysisTool::ACCESSIBILITY_ANALYSIS) { //可达性

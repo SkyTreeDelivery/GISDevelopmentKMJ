@@ -190,16 +190,9 @@ int GeoLayer::getDataChangedType()
 	return dataChangeType;
 }
 
-GeoFeature * GeoLayer::identify(GeoPoint * point, GeoLayer * layer,float threshold)
+GeoFeature * GeoLayer::identify(GeoPoint * point, float threshold)
 {
-	GeoFeature *featureFound;
-	if (layer->getIndexMode() == EnumType::GRIDINDEX) {
-		featureFound = static_cast<GridIndex*>(spatialIndex)->searchGrid(point, threshold);
-	}
-	else if (layer->getIndexMode() == EnumType::QUADTREE) {
-		featureFound = static_cast<QuadTree*>(spatialIndex)->SearchQuadTree(point, threshold);
-	}
-	return featureFound;
+	return util::identify(point, this, threshold, spatialIndex);
 }
 
 QList<GeoFeature*> GeoLayer::search(QString attriName, QString attriValue)

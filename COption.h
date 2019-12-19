@@ -1,6 +1,7 @@
 #pragma once
 #include"qstring.h"
-class COption
+#include "Option.h"
+class COption:public Option
 {
 public:
 	COption();

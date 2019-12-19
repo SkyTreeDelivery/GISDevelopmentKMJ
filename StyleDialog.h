@@ -23,7 +23,7 @@ private:
 	void initTree(GeoLayer* layer);
 	GeoLayer* layer;
 	MarkerSymbol* marker;
-	LineSymbol* marker_line;
+	//LineSymbol* marker_line;  //TODO 点外边线样式
 	LineSymbol* line;
 	LineSymbol* fill_outline;
 	FillSymbol* fill;
