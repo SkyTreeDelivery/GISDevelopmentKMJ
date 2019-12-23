@@ -69,9 +69,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>340</y>
+     <y>334</y>
      <width>72</width>
-     <height>15</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">
@@ -127,14 +127,14 @@
   <widget class="QLabel" name="unitLabel">
    <property name="geometry">
     <rect>
-     <x>480</x>
-     <y>380</y>
-     <width>72</width>
+     <x>471</x>
+     <y>390</y>
+     <width>81</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>单位：米</string>
+    <string>单位：分钟</string>
    </property>
   </widget>
   <widget class="QComboBox" name="nodeBox">
@@ -181,9 +181,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>280</y>
+     <y>275</y>
      <width>101</width>
-     <height>16</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">

@@ -96,46 +96,65 @@ void QtFunctionWidget::paintGL(){
 		qDebug() << "........................................";
 		for(int j = 0; j < map->size();j++){   //从map的第一个layer向后绘制，认为第一个为最底层
 			GeoLayer* layer = map->getLayerAt(j);
+
+			int dataType = layer->getDataType();
+			int rendererType = layer->getRendererType();
+			QString attriToStretch = layer->getAttriToStretch();
+
 			if(layer->isVisable()){
 				int type = layer->getType();
 				Render* render = layer->getRender();
+				StretchRenderer* streRenderer = layer->getStretchRenderer();
 				//配置线宽
 				if (type == EnumType::POINT) { shaderProgram.setUniformValue("size", render->getMarkerSymbol()->getSize()); } //暂时无效，glPointSize无法使用
 				else if (type == EnumType::POLYLINE) { glLineWidth(render->getLineSymbol()->getWidth()); }
 				else if (type = EnumType::POLYGON) { glLineWidth(render->getFillSymbol()->getOutline()->getWidth()); }
 				if (layer->size() && featureVaosMap.size()) {
 					int renderLayerNum = featureVaosMap[layer->getFeatureAt(0)]->size();
+					if(dataType == EnumType::dataRenderType::GRIDTYPE) renderLayerNum = 1;
 					for (int i = 0; i < renderLayerNum; i++) {
 						bool renderColorChanged = true;
 						for (int m = 0; m < layer->size(); m++) {
 							GeoFeature* feature = layer->getFeatureAt(m);
 							QOpenGLVertexArrayObject* vao = featureVaosMap[feature]->at(i);
 							QOpenGLVertexArrayObject::Binder vaoBind(vao);
-							int renderType = vao->property("renderType").toInt();
+							int geoRenderType = vao->property("geoRenderType").toInt();
 							if (renderColorChanged) {  //配置渲染层颜色,这样的设计不支持分层设色，如要支持，需要每个feature，即vao更新一次颜色
-								setDefaultRenderColor(render,renderType);
+								setDefaultRenderColor(dataType, rendererType,
+									render, geoRenderType, streRenderer, 
+									(*(feature->getAttributeMap()))[attriToStretch].toFloat());
 								renderColorChanged = false;
+							}
+							if (dataType == EnumType::dataRenderType::GRIDTYPE && rendererType == EnumType::rendererType::STRETCHRGB) {  //栅格每次都要改个颜色
+								setDefaultRenderColor(dataType, rendererType,
+									render, geoRenderType, streRenderer,
+									(*(feature->getAttributeMap()))[attriToStretch].toFloat());
+							}
+							if (dataType == EnumType::dataRenderType::GEOMETRYTYPE && rendererType == EnumType::rendererType::STRETCHRGB) {
+								setDefaultRenderColor(dataType, rendererType,
+									render, geoRenderType, streRenderer,
+									(*(feature->getAttributeMap()))[attriToStretch].toFloat());
 							}
 							if (layer->getSelectedFeatures().size()) {  //设置被选择的颜色配置
 								if (layer->hasSelected(feature)) {
-									setSelectedRenderColor(render, renderType);
+									setSelectedRenderColor(render, geoRenderType);
 									renderColorChanged = true;
 								}
 							}
 							//判断buffer类型，绘制，note：默认需要ebo的只有面剖分填充，因为其他都可以不适用ebo，效率没有明显差别，而剖分填充使用ebo大大提高效率
 							if (vao->property("bufferType").toInt() == EnumType::bufferType::VBO) {
-								switch (vao->property("renderType").toInt())
+								switch (vao->property("geoRenderType").toInt())
 								{
-								case EnumType::renderType::MARKER_FILL:
+								case EnumType::geoRenderType::MARKER_FILL:
 									glDrawArrays(GL_POINTS, 0, layer->getFeatureAt(m)->getGeometry()->size());
 									break;
-								case EnumType::renderType::MARKER_LINE:
+								case EnumType::geoRenderType::MARKER_LINE:
 									glDrawArrays(GL_LINE_LOOP, 0, layer->getFeatureAt(m)->getGeometry()->size());
 									break;
-								case EnumType::renderType::LINE_LINE:
+								case EnumType::geoRenderType::LINE_LINE:
 									glDrawArrays(GL_LINE_STRIP, 0, layer->getFeatureAt(m)->getGeometry()->size());
 									break;
-								case EnumType::renderType::FILL_LINE:
+								case EnumType::geoRenderType::FILL_LINE:
 									glDrawArrays(GL_LINE_LOOP, 0, layer->getFeatureAt(m)->getGeometry()->size());
 									break;
 								default:
@@ -143,9 +162,9 @@ void QtFunctionWidget::paintGL(){
 								}
 							}
 							else if (vao->property("bufferType").toInt() == EnumType::bufferType::EBO) {
-								switch (vao->property("renderType").toInt())
+								switch (vao->property("geoRenderType").toInt())
 								{
-								case EnumType::renderType::FILL_FILL:
+								case EnumType::geoRenderType::FILL_FILL:
 									glDrawElements(GL_TRIANGLES, vao->property("indexNum").toInt(), GL_UNSIGNED_INT, 0);
 									break;
 								default:
@@ -190,6 +209,11 @@ GeoMap * QtFunctionWidget::getMap()
 void QtFunctionWidget::moveLayerLevel(int from, int to)
 {
 	map->moveLayerLevel(from, to);
+}
+
+void QtFunctionWidget::setOutCurrentLayer(GeoLayer * layer)
+{
+	switchLayer(layer);
 }
 
 void QtFunctionWidget::changeLayer(GeoLayer* layer)
@@ -354,7 +378,7 @@ void QtFunctionWidget::bindVaos(GeoLayer* layer)
 			vaoList->push_back(vao);
 			vao->setProperty("bufferType", QVariant(EnumType::bufferType::VBO));
 			vao->setProperty("geoType", QVariant(EnumType::geometryType::POINT));
-			vao->setProperty("renderType", QVariant(EnumType::renderType::MARKER_FILL));
+			vao->setProperty("geoRenderType", QVariant(EnumType::geoRenderType::MARKER_FILL));
 			featureVaosMap.insert(feature, vaoList);
 			
 			QOpenGLVertexArrayObject::Binder vaoBind0(vao);
@@ -390,7 +414,7 @@ void QtFunctionWidget::bindVaos(GeoLayer* layer)
 			vaoList->push_back(vao);
 			vao->setProperty("bufferType", QVariant(EnumType::bufferType::VBO));
 			vao->setProperty("geoType", QVariant(EnumType::geometryType::POLYLINE));
-			vao->setProperty("renderType", QVariant(EnumType::renderType::LINE_LINE));
+			vao->setProperty("geoRenderType", QVariant(EnumType::geoRenderType::LINE_LINE));
 			featureVaosMap.insert(feature, vaoList);
 
 			QOpenGLVertexArrayObject::Binder vaoBind0(vao);
@@ -417,108 +441,162 @@ void QtFunctionWidget::bindVaos(GeoLayer* layer)
 			GLfloat* vertices = NULL;
 
 			//三角剖分数据 - level0
-			gpc_tristrip tristrip;
-			util::tesselation(polygon, &tristrip); 
+			if (currentLayer->getDataType() == EnumType::dataRenderType::GEOMETRYTYPE) {
 
-			int stripNum = tristrip.num_strips;		//三角分组数
-			int triNum = 0;		//三角个数
-			int vertexNum = 0;		//顶点个数，没有重复顶点
-			for (int i = 0; i < stripNum; i++)
-			{
-				triNum += tristrip.strip[i].num_vertices - 2;//计算一共有多少三角形
-				vertexNum += tristrip.strip[i].num_vertices;//计算一共有多少顶点
-			}
+				gpc_tristrip tristrip;
+				util::tesselation(polygon, &tristrip);
 
-			//创建顶点数组
-			vertices = new GLfloat[size * vertexNum];
-			int idx = 0;
-			for (int i = 0; i < stripNum; i++) {  //i为每个三角形组
-				gpc_vertex_list list = tristrip.strip[i];
-				for (int j = 0; j < list.num_vertices; j++) {  //j为三角形组中的每个顶点
-					gpc_vertex vertex = list.vertex[j];
-					float x = vertex.x;
-					float y = vertex.y;
-					vertices[idx * size + 0] = GLfloat(x);
-					vertices[idx * size + 1] = GLfloat(y);
-					vertices[idx * size + 2] = GLfloat(0.0);
-					idx++;
+				int stripNum = tristrip.num_strips;		//三角分组数
+				int triNum = 0;		//三角个数
+				int vertexNum = 0;		//顶点个数，没有重复顶点
+				for (int i = 0; i < stripNum; i++)
+				{
+					triNum += tristrip.strip[i].num_vertices - 2;//计算一共有多少三角形
+					vertexNum += tristrip.strip[i].num_vertices;//计算一共有多少顶点
 				}
-			}
 
-			//创建索引数组
-			unsigned int *indices = new unsigned int[triNum * 3];
-			int idx1 = 0;
-			int cumulatedVertex = 0;
-			for (int i = 0; i < stripNum; i++) {//i为每个三角形组
-				gpc_vertex_list list = tristrip.strip[i];
-				for (int j = 0; j < list.num_vertices - 2; j++) {//j为三角形组中的每个三角形
-					for (int k = 0; k < 3; k++) {//k为0-3,代表每个三角形三个顶点的索引
-						indices[idx1++] = cumulatedVertex + j + k ;
+				//创建顶点数组
+				vertices = new GLfloat[size * vertexNum];
+				int idx = 0;
+				for (int i = 0; i < stripNum; i++) {  //i为每个三角形组
+					gpc_vertex_list list = tristrip.strip[i];
+					for (int j = 0; j < list.num_vertices; j++) {  //j为三角形组中的每个顶点
+						gpc_vertex vertex = list.vertex[j];
+						float x = vertex.x;
+						float y = vertex.y;
+						vertices[idx * size + 0] = GLfloat(x);
+						vertices[idx * size + 1] = GLfloat(y);
+						vertices[idx * size + 2] = GLfloat(0.0);
+						idx++;
 					}
 				}
-				cumulatedVertex += list.num_vertices;
+
+				//创建索引数组
+				unsigned int *indices = new unsigned int[triNum * 3];
+				int idx1 = 0;
+				int cumulatedVertex = 0;
+				for (int i = 0; i < stripNum; i++) {//i为每个三角形组
+					gpc_vertex_list list = tristrip.strip[i];
+					for (int j = 0; j < list.num_vertices - 2; j++) {//j为三角形组中的每个三角形
+						for (int k = 0; k < 3; k++) {//k为0-3,代表每个三角形三个顶点的索引
+							indices[idx1++] = cumulatedVertex + j + k;
+						}
+					}
+					cumulatedVertex += list.num_vertices;
+				}
+
+				QOpenGLVertexArrayObject* fillVao = new QOpenGLVertexArrayObject();
+				vaoList->push_back(fillVao);
+				fillVao->setProperty("bufferType", QVariant(EnumType::bufferType::EBO));
+				fillVao->setProperty("indexNum", triNum * 3);
+				fillVao->setProperty("geoType", QVariant(EnumType::geometryType::POLYGON));
+				fillVao->setProperty("geoRenderType", QVariant(EnumType::geoRenderType::FILL_FILL));
+				QOpenGLVertexArrayObject::Binder vaoBind0(fillVao);
+				QOpenGLBuffer* fillVbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+				fillVbo->create();
+				fillVbo->bind();
+				fillVbo->allocate(vertices, sizeof(GLfloat) * size * vertexNum);
+				boList->push_back(fillVbo);
+
+				QOpenGLBuffer* fillEbo = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+				fillEbo->create();
+				fillEbo->bind();
+				fillEbo->allocate(indices, sizeof(unsigned int) * triNum * 3);
+				boList->push_back(fillEbo);
+
+				int posAttr = -1;
+				//通过属性名从顶点着色器中获取到相应的属性location
+				posAttr = shaderProgram.attributeLocation("aPos");
+				shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * size);
+				shaderProgram.enableAttributeArray(posAttr);
+				shaderProgram.release();
+				fillVbo->release();
 			}
+			else if (currentLayer->getDataType() == EnumType::dataRenderType::GRIDTYPE) {
+				
+				int vertexNum = 4;
+				//创建顶点数组
+				vertices = new GLfloat[size * vertexNum];
+				GeoPolygon* polygon = (GeoPolygon*)geometry;
+				for (int j = 0; j < vertexNum; j++) {
+					GeoPoint* point = polygon->getPointAt(j);
+					float x = point->getXf();
+					float y = point->getYf();
+					vertices[j * size + 0] = GLfloat(x);
+					vertices[j * size + 1] = GLfloat(y);
+					vertices[j * size + 2] = GLfloat(0.0);
+				}
+				int triNum = 4;
+				//创建索引数组
+				unsigned int indices[] = {  // note that we start from 0!
+					0, 1, 2,  // first Triangle
+					1, 2, 3   // second Triangle
+				};
+				
 
-			QOpenGLVertexArrayObject* fillVao = new QOpenGLVertexArrayObject();
-			vaoList->push_back(fillVao);
-			fillVao->setProperty("bufferType", QVariant(EnumType::bufferType::EBO));
-			fillVao->setProperty("indexNum",triNum * 3);
-			fillVao->setProperty("geoType", QVariant(EnumType::geometryType::POLYGON));
-			fillVao->setProperty("renderType", QVariant(EnumType::renderType::FILL_FILL));
-			QOpenGLVertexArrayObject::Binder vaoBind0(fillVao);
-			QOpenGLBuffer* fillVbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-			fillVbo->create();
-			fillVbo->bind();
-			fillVbo->allocate(vertices, sizeof(GLfloat) * size * vertexNum);
-			boList->push_back(fillVbo);
+				QOpenGLVertexArrayObject* fillVao = new QOpenGLVertexArrayObject();
+				vaoList->push_back(fillVao);
+				fillVao->setProperty("bufferType", QVariant(EnumType::bufferType::EBO));
+				fillVao->setProperty("indexNum", triNum * 3);
+				fillVao->setProperty("geoType", QVariant(EnumType::geometryType::POLYGON));
+				fillVao->setProperty("geoRenderType", QVariant(EnumType::geoRenderType::FILL_FILL));
+				QOpenGLVertexArrayObject::Binder vaoBind0(fillVao);
+				QOpenGLBuffer* fillVbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+				fillVbo->create();
+				fillVbo->bind();
+				fillVbo->allocate(vertices, sizeof(GLfloat) * size * vertexNum);
+				boList->push_back(fillVbo);
 
-			QOpenGLBuffer* fillEbo = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
-			fillEbo->create();
-			fillEbo->bind();
-			fillEbo->allocate(indices, sizeof(unsigned int) * triNum * 3);
-			boList->push_back(fillEbo);
+				QOpenGLBuffer* fillEbo = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+				fillEbo->create();
+				fillEbo->bind();
+				fillEbo->allocate(indices, sizeof(unsigned int) * triNum * 3);
+				boList->push_back(fillEbo);
 
-			int posAttr = -1;
-			//通过属性名从顶点着色器中获取到相应的属性location
-			posAttr = shaderProgram.attributeLocation("aPos");
-			shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * size);
-			shaderProgram.enableAttributeArray(posAttr);
-			shaderProgram.release();
-			fillVbo->release();
+				int posAttr = -1;
+				//通过属性名从顶点着色器中获取到相应的属性location
+				posAttr = shaderProgram.attributeLocation("aPos");
+				shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * size);
+				shaderProgram.enableAttributeArray(posAttr);
+				shaderProgram.release();
+				fillVbo->release();
+			}
 
 			/*************************************************************************/
 
 			//边界数据 - level1
+			if (currentLayer->getDataType() == EnumType::dataRenderType::GEOMETRYTYPE) {
 
-			vertices = (GLfloat*)malloc(sizeof(GLfloat)*(geometry->size()) * size);
-			for (int j = 0; j < geometry->size(); j++) {
-				GeoPoint* point = polygon->getPointAt(j);
-				float x = point->getXf();
-				float y = point->getYf();
-				vertices[j * size + 0] = GLfloat(x);
-				vertices[j * size + 1] = GLfloat(y);
-				vertices[j * size + 2] = GLfloat(0.0);
+				vertices = (GLfloat*)malloc(sizeof(GLfloat)*(geometry->size()) * size);
+				for (int j = 0; j < geometry->size(); j++) {
+					GeoPoint* point = polygon->getPointAt(j);
+					float x = point->getXf();
+					float y = point->getYf();
+					vertices[j * size + 0] = GLfloat(x);
+					vertices[j * size + 1] = GLfloat(y);
+					vertices[j * size + 2] = GLfloat(0.0);
+				}
+
+				QOpenGLVertexArrayObject* outlineVao = new QOpenGLVertexArrayObject();
+				outlineVao->setProperty("bufferType", QVariant(EnumType::bufferType::VBO));
+				outlineVao->setProperty("geoType", QVariant(EnumType::geometryType::POLYGON));
+				outlineVao->setProperty("geoRenderType", QVariant(EnumType::geoRenderType::FILL_LINE));
+				vaoList->push_back(outlineVao);
+
+				QOpenGLVertexArrayObject::Binder vaoBind1(outlineVao);
+				QOpenGLBuffer* outlineVbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+				outlineVbo->create();
+				outlineVbo->bind();
+				outlineVbo->allocate(vertices, sizeof(GLfloat)*(geometry->size())*size);
+
+				int posAttr = -1;
+				//通过属性名从顶点着色器中获取到相应的属性location
+				posAttr = shaderProgram.attributeLocation("aPos");
+				shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * size);
+				shaderProgram.enableAttributeArray(posAttr);
+				shaderProgram.release();
+				outlineVbo->release();
 			}
-
-			QOpenGLVertexArrayObject* outlineVao = new QOpenGLVertexArrayObject();
-			outlineVao->setProperty("bufferType", QVariant(EnumType::bufferType::VBO));
-			outlineVao->setProperty("geoType", QVariant(EnumType::geometryType::POLYGON));
-			outlineVao->setProperty("renderType", QVariant(EnumType::renderType::FILL_LINE));
-			vaoList->push_back(outlineVao);
-
-			QOpenGLVertexArrayObject::Binder vaoBind1(outlineVao);
-			QOpenGLBuffer* outlineVbo = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-			outlineVbo->create();
-			outlineVbo->bind();
-			outlineVbo->allocate(vertices, sizeof(GLfloat)*(geometry->size())*size);
-
-			posAttr = -1;
-			//通过属性名从顶点着色器中获取到相应的属性location
-			posAttr = shaderProgram.attributeLocation("aPos");
-			shaderProgram.setAttributeBuffer(posAttr, GL_FLOAT, sizeof(GLfloat) * 0, 3, sizeof(GLfloat) * size);
-			shaderProgram.enableAttributeArray(posAttr);
-			shaderProgram.release();
-			outlineVbo->release();
 		}
 		else {
 			qWarning() << "map class not set";
@@ -603,7 +681,10 @@ void QtFunctionWidget::on_zoomToFeature(GeoFeature * feature)
 	QRectF rect = feature->getGeometry()->getRect();
 	refreshWorldRectForScale(rect.center(), rect,EnumType::scaleType::worldScale);  //先缩放
 	refreshWorldRectForTrans( rect.center(), worldRect.center(), EnumType::scaleType::worldScale); //后平移
-	currentLayer->selectFeature(feature);
+	for (int i = 0; i < map->size(); i++) {
+		map->getLayerAt(i)->selectFeature(feature);
+	}
+	changeTableSelectionSignal(feature);
 	project();
 	update();
 	//switchWorldRect(feature);
@@ -611,8 +692,10 @@ void QtFunctionWidget::on_zoomToFeature(GeoFeature * feature)
 
 void QtFunctionWidget::on_transToFeature(GeoFeature * feature)
 {
-	refreshWorldRectForTrans(feature->getGeometry()->getRect().center(), worldRect.center(), EnumType::scaleType::worldScale);
-	currentLayer->selectFeature(feature);
+	refreshWorldRectForTrans(feature->getGeometry()->getRect().center(), worldRect.center(), EnumType::scaleType::worldScale); for (int i = 0; i < map->size(); i++) {
+		map->getLayerAt(i)->selectFeature(feature);
+	}
+	changeTableSelectionSignal(feature);
 	project();
 	update();
 }
@@ -724,27 +807,63 @@ void QtFunctionWidget::keyReleaseEvent(QKeyEvent * event)
 	}
 }
 
-void QtFunctionWidget::setDefaultRenderColor(Render* render, int type)
+void QtFunctionWidget::setDefaultRenderColor(int dataType,int rendererType,
+	Render* render, int geoRenderType,
+	StretchRenderer* streRenderer,float cellValue)
 {
-	switch (type)
-	{
-	case EnumType::renderType::MARKER_FILL:
-		shaderProgram.setUniformValue("color", render->getMarkerSymbol()->getColor()); //note:这里的setUniformValue会自动将qcolor中的0-255颜色分量归一化
-		break;
-	case EnumType::renderType::MARKER_LINE:
-		shaderProgram.setUniformValue("color", render->getMarkerSymbol()->getOutline()->getColor());
-		break;
-	case EnumType::renderType::LINE_LINE:
-		shaderProgram.setUniformValue("color", render->getLineSymbol()->getColor());
-		break;
-	case EnumType::renderType::FILL_FILL:
-		shaderProgram.setUniformValue("color", render->getFillSymbol()->getColor());
-		break;
-	case EnumType::renderType::FILL_LINE:
-		shaderProgram.setUniformValue("color", render->getFillSymbol()->getOutline()->getColor());
-		break;
-	default:
-		break;
+	if (dataType == EnumType::dataRenderType::GEOMETRYTYPE) {
+		if (rendererType == EnumType::rendererType::SIGNALRGB) {
+			switch (geoRenderType)
+			{
+			case EnumType::geoRenderType::MARKER_FILL:
+				shaderProgram.setUniformValue("color", render->getMarkerSymbol()->getColor()); //note:这里的setUniformValue会自动将qcolor中的0-255颜色分量归一化
+				break;
+			case EnumType::geoRenderType::MARKER_LINE:
+				shaderProgram.setUniformValue("color", render->getMarkerSymbol()->getOutline()->getColor());
+				break;
+			case EnumType::geoRenderType::LINE_LINE:
+				shaderProgram.setUniformValue("color", render->getLineSymbol()->getColor());
+				break;
+			case EnumType::geoRenderType::FILL_FILL:
+				shaderProgram.setUniformValue("color", render->getFillSymbol()->getColor());
+				break;
+			case EnumType::geoRenderType::FILL_LINE:
+				shaderProgram.setUniformValue("color", render->getFillSymbol()->getOutline()->getColor());
+				break;
+			default:
+				break;
+			}
+		}
+		else if (rendererType == EnumType::rendererType::STRETCHRGB) {
+			switch (geoRenderType)
+			{
+			case EnumType::geoRenderType::MARKER_FILL:
+				shaderProgram.setUniformValue("color", streRenderer->cellColor(cellValue)); //note:这里的setUniformValue会自动将qcolor中的0-255颜色分量归一化
+				break;
+			case EnumType::geoRenderType::MARKER_LINE:
+				shaderProgram.setUniformValue("color", streRenderer->cellColor(cellValue));
+				break;
+			case EnumType::geoRenderType::LINE_LINE:
+				shaderProgram.setUniformValue("color", streRenderer->cellColor(cellValue));
+				break;
+			case EnumType::geoRenderType::FILL_FILL:
+				shaderProgram.setUniformValue("color", streRenderer->cellColor(cellValue));
+				break;
+			case EnumType::geoRenderType::FILL_LINE:
+				shaderProgram.setUniformValue("color", streRenderer->cellColor(cellValue));
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	else if (dataType == EnumType::dataRenderType::GRIDTYPE) {
+		if (rendererType == EnumType::rendererType::SIGNALRGB) {
+			
+		}
+		else if (rendererType == EnumType::rendererType::STRETCHRGB) {
+			shaderProgram.setUniformValue("color", streRenderer->cellColor(cellValue));
+		}
 	}
 }
 
@@ -752,19 +871,19 @@ void QtFunctionWidget::setSelectedRenderColor(Render * render, int type)
 {
 	switch (type)
 	{
-	case EnumType::renderType::MARKER_FILL:
+	case EnumType::geoRenderType::MARKER_FILL:
 		shaderProgram.setUniformValue("color", render->getSelectionMarkerSymbol()->getColor()); //note:这里的setUniformValue会自动将qcolor中的0-255颜色分量归一化
 		break;
-	case EnumType::renderType::MARKER_LINE:
+	case EnumType::geoRenderType::MARKER_LINE:
 		shaderProgram.setUniformValue("color", render->getSelectionMarkerSymbol()->getOutline()->getColor());
 		break;
-	case EnumType::renderType::LINE_LINE:
+	case EnumType::geoRenderType::LINE_LINE:
 		shaderProgram.setUniformValue("color", render->getSelectionLineSymbol()->getColor());
 		break;
-	case EnumType::renderType::FILL_FILL:
+	case EnumType::geoRenderType::FILL_FILL:
 		shaderProgram.setUniformValue("color", render->getSelectionFillSymbol()->getColor());
 		break;
-	case EnumType::renderType::FILL_LINE:
+	case EnumType::geoRenderType::FILL_LINE:
 		shaderProgram.setUniformValue("color", render->getSelectionFillSymbol()->getOutline()->getColor());
 		break;
 	default:

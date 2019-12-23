@@ -16,6 +16,7 @@ public:
 	int size();
 	QRectF getRect();
 	double disToPoint(GeoPoint *pt);//点到多线的距离，为最近距离
+	GeoPoint* getMeanCenter();
 private:
     QList<GeoPoint*> pts;
 };

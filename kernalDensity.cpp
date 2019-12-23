@@ -9,7 +9,7 @@ KernalDensity::KernalDensity(QWidget *parent) :
 	this->setWindowTitle("Kernal Density");
 
 	//设置按钮的图片
-	QIcon icoOpenFile(":/openFile/openfile.jpg");
+	QIcon icoOpenFile("img/openfile.jpg");
 	ui->PB_GetInputLayer->setIcon(icoOpenFile);
 	ui->PB_GetInputLayer->setIconSize(QSize(28, 26));
 	ui->PB_populationField->setIcon(icoOpenFile);
@@ -93,7 +93,7 @@ void KernalDensity::getInputLayer()
 			layerName = map->getLayerAt(i)->getName();
 			ui->CB_LayerInput->addItem(layerName);
 		}
-		//传递Population field的选项
+		
 	}
 }
 
@@ -101,20 +101,23 @@ void KernalDensity::getPopulationField()
 {
 	if (map->size() != 0)
 	{
-		int currentLayerId = ui->CB_LayerInput->currentIndex();
+		currentLayerId = ui->CB_LayerInput->currentIndex();
+		ui->CB_Population->clear();
 		QList<QString> attriNames = map->getLayerAt(currentLayerId)->getAttributeNames();
 		int attriNum = attriNames.size();
 		for (int i = 0; i < attriNum; i++)
 		{
 			ui->CB_Population->addItem(attriNames.at(i));
 		}
+		ui->CB_Population->addItem("NONE");
+		
 	}
 }
 
 void KernalDensity::getRasterOut()
 {
 	QString filePath;
-	filePath = QFileDialog::getSaveFileName(this, QString::fromLocal8Bit("save file"), "", tr("Config Files(*.tif)"));
+	filePath = QFileDialog::getSaveFileName(this, QString::fromLocal8Bit("save file"), "", tr("JPEG(*.jpg);;PNG(*.png);;BMP(*.bmp)"));
 	ui->LE_OutRaster->setText(filePath);
 
 }

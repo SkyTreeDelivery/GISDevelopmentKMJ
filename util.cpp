@@ -53,6 +53,8 @@ GeoLayer* util::openGeoJson(QString path)
     QJsonArray featuresJ = jsonData["features"].toArray();
 
 	GeoLayer* layer = new GeoLayer();
+	layer->setDataType(EnumType::dataRenderType::GEOMETRYTYPE);
+	layer->setRendererType(EnumType::rendererType::SIGNALRGB);
 	layer->setSource(EnumType::source::GEOJSON);
 	layer->bindDefaultRender();
 	layer->setFullPath(path);
@@ -166,6 +168,8 @@ GeoLayer * util::openShapeFile(QString path)
 
 	//创建地图对象并添加图层
 	GeoLayer *layer = new GeoLayer;
+	layer->setDataType(EnumType::dataRenderType::GEOMETRYTYPE);
+	layer->setRendererType(EnumType::rendererType::SIGNALRGB);
 	bool hasInitAttriNames = false;
 	QRectF layerRect;
 	layer->setSource(EnumType::source::SHAPEFILE);
@@ -193,6 +197,9 @@ GeoLayer * util::openShapeFile(QString path)
 		OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
 		int fieldNum = poFDefn->GetFieldCount(); //获得字段的数目，不包括前两个字段（FID,Shape），这两个字段在arcgis里也不能被修改;
 		QList<QString> nameList;
+
+
+
 		for (int fieldi = 0; fieldi < fieldNum; fieldi++)
 		{
 			OGRFieldDefn *poFieldDefn = poFDefn->GetFieldDefn(fieldi);
@@ -283,6 +290,8 @@ GeoLayer * util::openShapeFile(QString path)
 		}
 		OGRFeature::DestroyFeature(poFeature);
 	}
+
+
 	if (layer->getIndexMode() == EnumType::indexMode::GRIDINDEX) {
 		GridIndex* gridIndex = new GridIndex;
 		gridIndex->setGrid(layer->getRect(), layer->getAllFeature());
@@ -303,9 +312,11 @@ GeoLayer * util::openShapeFile(QString path)
 GeoLayer * util::openFileFromPostgresql(QString path,QString layername)
 {
 	GeoLayer* layer = new GeoLayer;
+	layer->setDataType(EnumType::dataRenderType::GEOMETRYTYPE);
+	layer->setRendererType(EnumType::rendererType::SIGNALRGB);
 	bool hasInitAttriNames = false;
 	layer->bindDefaultRender();
-	layer->setFullPath(path);
+	layer->setFullPath(path + "-" + layername);
 	layer->setName(layername);
 	layer->setSource(EnumType::source::POSTGRESQL);
 	layer->setIndexMode(EnumType::indexMode::QUADTREE);
@@ -767,6 +778,65 @@ void util::tesselation(GeoPolygon* opolygon, gpc_tristrip* tristrip)
 	}
 	return color;
 }*/
+
+GeoLayer * util::grid2FeatureLayer(float ** gridData, QRectF mbr, int widthNum, int heightNum,
+	float cellSize, QString fullPath, QString name, QString cellValueAttriName)
+{
+	if (widthNum > 0 && heightNum > 0 && cellSize > 0) {
+		GeoLayer* layer = new GeoLayer;
+		//基本属性
+		layer->setAttriToStretch(cellValueAttriName);
+		layer->setDataType(EnumType::dataRenderType::GRIDTYPE);
+		layer->setRendererType(EnumType::rendererType::STRETCHRGB);
+		layer->setSource(EnumType::source::GEOTIFF);
+		layer->bindDefaultRender();
+		layer->setFullPath(fullPath);
+		layer->setName(name);
+		layer->setIndexMode(EnumType::indexMode::QUADTREE);
+
+		//属性数据与空间数据
+		QList<QString> names;
+		names.push_back(cellValueAttriName);
+		layer->setAttributeNames(names);
+		layer->setType(EnumType::POLYGON);
+		QList<float> values;
+		for (int i = 0; i < heightNum; i++) {
+			for (int j = 0; j < widthNum; j++) {
+				GeoFeature* feature = new GeoFeature;
+				layer->addFeature(feature);
+				*(feature->getAttributeMap())->insert(cellValueAttriName, gridData[i][j]);
+				qDebug() << "----" << gridData[i][j];
+				values.push_back(gridData[i][j]);
+				GeoPolygon* cell = new GeoPolygon;
+				feature->setGemetry(cell);
+				QPointF center(mbr.left() + cellSize / 2 + j * cellSize, mbr.top() - cellSize / 2 - i * cellSize);
+				GeoPoint* leftTop = new GeoPoint(center.x() - cellSize / 2, center.y() + cellSize / 2);
+				GeoPoint* rightTop = new GeoPoint(center.x() + cellSize / 2, center.y() + cellSize / 2);
+				GeoPoint* leftBottom = new GeoPoint(center.x() - cellSize / 2, center.y() - cellSize / 2);
+				GeoPoint* rightBottom = new GeoPoint(center.x() + cellSize / 2, center.y() - cellSize / 2);
+				cell->addPoint(leftTop);
+				cell->addPoint(rightTop);
+				cell->addPoint(leftBottom);
+				cell->addPoint(rightBottom);
+			}
+		}
+		layer->getStretchRenderer()->setRange(values);
+		//索引
+		if (layer->getIndexMode() == EnumType::indexMode::GRIDINDEX) {
+			GridIndex* gridIndex = new GridIndex;
+			gridIndex->setGrid(layer->getRect(), layer->getAllFeature());
+			layer->setIndex(gridIndex);
+		}
+		else if (layer->getIndexMode() == EnumType::indexMode::QUADTREE) {
+			QuadTree* quadTree = new QuadTree;
+			quadTree->CreateQuadTree(layer->getRect(), layer->getAllFeature());
+			layer->setIndex(quadTree);
+		}
+		return layer;
+	}
+	return NULL;
+}
+
 
 
 

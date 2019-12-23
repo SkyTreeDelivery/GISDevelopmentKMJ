@@ -38,6 +38,7 @@ public slots:
 private:
     Ui::KernalDensity *ui;
 	GeoMap *map;
+	int currentLayerId;
 };
 
 #endif // KERNALDENSITY_H

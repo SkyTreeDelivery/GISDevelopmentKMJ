@@ -27,6 +27,7 @@ public:
 	void setHasTableShowing(bool flag);
 	GeoMap* getMap();
 	void moveLayerLevel(int from, int to);
+	void setOutCurrentLayer(GeoLayer* layer);
 
 protected:
     virtual void initializeGL() Q_DECL_OVERRIDE;
@@ -76,7 +77,7 @@ private:
 	void switchWorldRect(QRectF rect);		//切换绘制区域，执行重绘
    //------------------------------------------------------------------------
 
-	void setDefaultRenderColor(Render* render,int type);
+	void setDefaultRenderColor(int dataType, int rendererType, Render* render, int geoRenderType, StretchRenderer* streRenderer, float cellValue);
 	void setSelectedRenderColor(Render* render, int type);
 	void releaseVaos(GeoLayer* layer);
 	void bindVaos(GeoLayer* layer);

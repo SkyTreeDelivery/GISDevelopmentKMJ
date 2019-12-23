@@ -91,6 +91,7 @@ public slots:  //必须声明为slots才行
 	void on_selectedStatus_Changed(QList<GeoFeature*> features);
 	void on_textout_triggered(QString text);
 	void on_updateMap();
+	void on_addNewLayer(GeoLayer* layer);
 };
 
 #endif // MAINWINDOW_H

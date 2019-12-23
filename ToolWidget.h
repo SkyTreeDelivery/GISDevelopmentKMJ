@@ -23,6 +23,10 @@ private:
 	AccessAnalysisWidget* aaw;
 
 	void initAccessibilityAnalysisWidget();
+	void execKDEDiolog();
+
+signals:
+	void on_addNewLayerSignal(GeoLayer* layer);
 public slots:
 	void on_item_clicked(QTreeWidgetItem* item);
 };

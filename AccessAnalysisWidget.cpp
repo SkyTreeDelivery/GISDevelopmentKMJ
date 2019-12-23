@@ -20,6 +20,7 @@ AccessAnalysisWidget::~AccessAnalysisWidget()
 
 void AccessAnalysisWidget::initWidget()
 {
+	ui->oriBox->clear();
 	ui->oriBox->addItem(oriBoxSelectHint);
 	ui->dirPointLayerBox->clear();
 	ui->arcBox->clear();

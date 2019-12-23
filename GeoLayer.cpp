@@ -4,7 +4,7 @@
 
 GeoLayer::GeoLayer():render(NULL),visibility(true), selectMode(EnumType::selectMode::SINGLEMODE),
 dataChangeType(EnumType::dataChangedType::NOCHANGEDATA), indexMode(EnumType::indexMode::QUADTREE),type(-1),
-globalDefaultColomn("")
+globalDefaultColomn("NAME")
 {
 
 }
@@ -116,13 +116,15 @@ void GeoLayer::bindDefaultRender()
 	MarkerSymbol* markerSymbol = new MarkerSymbol();
 	FillSymbol* fillSymbol = new FillSymbol();
 	QColor black;
-	QColor red;
 	QColor white;
+	QColor red;
+	QColor blue;
 	QColor yellow;
 	QColor EEEEEE;
 	black.setNamedColor("black");
-	red.setNamedColor("red");
 	white.setNamedColor("white");
+	red.setNamedColor("red");
+	blue.setNamedColor("blue");
 	yellow.setNamedColor("yellow");
 	EEEEEE.setNamedColor("#EEEEEE");
 	lineSymbol->setWidth(1.5);   //线宽默认为1.5
@@ -141,6 +143,12 @@ void GeoLayer::bindDefaultRender()
 	render->setFillSymbol(fillSymbol);
 	render->setLineSymbol(lineSymbol);
 	this->render = render;
+
+	//绑定stretchRenderer
+	StretchRenderer* renderer = new StretchRenderer();
+	renderer->addColor(blue);
+	renderer->addColor(red);
+	stretchRenderer = renderer;
 }
 
 void GeoLayer::setSource(int source)
@@ -158,6 +166,8 @@ QString GeoLayer::getSourceName()
 	if (this->source == EnumType::source::GEOJSON) return "GeoJson";
 	else if (this->source == EnumType::source::SHAPEFILE) return "ShapeFile";
 	else if (this->source == EnumType::source::POSTGRESQL) return "PostgreSql";
+	else if (this->source == EnumType::source::GEOTIFF) return "GEOTIFF";
+	else return "Unknown Type";
 }
 
 void GeoLayer::setAttributeNames(QList<QString> names)
@@ -300,6 +310,46 @@ QString GeoLayer::getGlobalDefaultColomn()
 void GeoLayer::setGelbalDefaultColomn(QString def)
 {
 	globalDefaultColomn = def;
+}
+
+StretchRenderer * GeoLayer::getStretchRenderer()
+{
+	return this->stretchRenderer;
+}
+
+void GeoLayer::setStretchRenderer(StretchRenderer * renderer)
+{
+	this->stretchRenderer = renderer;
+}
+
+int GeoLayer::getDataType()
+{
+	return dataType;
+}
+
+void GeoLayer::setDataType(int type)
+{
+	dataType = type;
+}
+
+int GeoLayer::getRendererType()
+{
+	return rendererType;
+}
+
+void GeoLayer::setRendererType(int type)
+{
+	rendererType = type;
+}
+
+QString GeoLayer::getAttriToStretch()
+{
+	return attriToStretch;
+}
+
+void GeoLayer::setAttriToStretch(QString attri)
+{
+	attriToStretch = attri;
 }
 	
 QRectF GeoLayer::getRect()

@@ -57,3 +57,4 @@ QRectF GeoPolygon::getRect()
 	}
 	return QRectF(QPointF(left,top),QPointF(right,bottom));
 }
+

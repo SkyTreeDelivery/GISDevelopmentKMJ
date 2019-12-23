@@ -12,7 +12,7 @@ public:
 	AccessibilityAnalysisTool();
 	~AccessibilityAnalysisTool(); 
 
-	GeoLayer* run_tool();
+	int run_tool();
 private:
 	QSqlDatabase db;
 	QString dijkstraSql;

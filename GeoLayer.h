@@ -9,9 +9,10 @@
 #include "GeoGeometry.h"
 #include "GeoFeature.h"
 
-#include"GridIndex.h"
+#include "GridIndex.h"
 #include "QuadTree.h"
-#include"gpc/gpc.h"
+#include "gpc/gpc.h"
+#include "StretchRenderer.h"
 
 class GeoLayer
 {
@@ -53,6 +54,16 @@ public:
 	void setSpatialIndex(Index *idx);
 	QString getGlobalDefaultColomn();
 	void setGelbalDefaultColomn(QString def);
+	StretchRenderer* getStretchRenderer();
+	void setStretchRenderer(StretchRenderer* renderer);
+
+
+	int getDataType();
+	void setDataType(int type);
+	int getRendererType();
+	void setRendererType(int type);
+	QString getAttriToStretch();
+	void setAttriToStretch(QString attri);
 	
 //与空间查询相关的：
 	//识别
@@ -71,10 +82,10 @@ public:
 	void moveFeatureToTop(GeoFeature* feature);
 private:
 	Render* render;
+	StretchRenderer* stretchRenderer;
 	QString name;
 	QString fullpath;
 	bool visibility;
-
 	int type;   //一层只能添加一种数据
     QList<GeoFeature*> features;
 	int source;  //显示数据的完整url
@@ -85,6 +96,10 @@ private:
 	int indexMode;//索引模式
 	Index *spatialIndex;
 	QString globalDefaultColomn; //使用NAME作为全局检索的默认属性
+
+	int dataType;  //表示是栅格数据还是矢量数据，凑合用下,后可用栅格数据类代替
+	int rendererType;  //表示是单色渲染还是多色渲染，凑合着用，后可用矢量与栅格renderer代替
+	QString attriToStretch;
 };
 
 #endif // GEOLAYER_H

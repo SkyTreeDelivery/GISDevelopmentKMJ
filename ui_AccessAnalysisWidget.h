@@ -57,7 +57,7 @@ public:
         nodeLabel->setGeometry(QRect(40, 220, 81, 20));
         timeLimitLabel = new QLabel(AccessAnalysisWidget);
         timeLimitLabel->setObjectName(QString::fromUtf8("timeLimitLabel"));
-        timeLimitLabel->setGeometry(QRect(40, 340, 72, 15));
+        timeLimitLabel->setGeometry(QRect(40, 334, 72, 21));
         timeLimitTextLine = new QLineEdit(AccessAnalysisWidget);
         timeLimitTextLine->setObjectName(QString::fromUtf8("timeLimitTextLine"));
         timeLimitTextLine->setGeometry(QRect(40, 360, 501, 21));
@@ -72,7 +72,7 @@ public:
         cancelButton->setGeometry(QRect(460, 440, 93, 28));
         unitLabel = new QLabel(AccessAnalysisWidget);
         unitLabel->setObjectName(QString::fromUtf8("unitLabel"));
-        unitLabel->setGeometry(QRect(480, 380, 72, 21));
+        unitLabel->setGeometry(QRect(471, 390, 81, 21));
         nodeBox = new QComboBox(AccessAnalysisWidget);
         nodeBox->setObjectName(QString::fromUtf8("nodeBox"));
         nodeBox->setGeometry(QRect(40, 240, 501, 21));
@@ -87,7 +87,7 @@ public:
         saveFieldTextLine->setGeometry(QRect(40, 300, 501, 21));
         saveFieldLabel = new QLabel(AccessAnalysisWidget);
         saveFieldLabel->setObjectName(QString::fromUtf8("saveFieldLabel"));
-        saveFieldLabel->setGeometry(QRect(40, 280, 101, 16));
+        saveFieldLabel->setGeometry(QRect(40, 275, 101, 21));
 
         retranslateUi(AccessAnalysisWidget);
 
@@ -104,7 +104,7 @@ public:
         timeLimitLabel->setText(QCoreApplication::translate("AccessAnalysisWidget", "\346\227\266\351\227\264\350\214\203\345\233\264", nullptr));
         okButton->setText(QCoreApplication::translate("AccessAnalysisWidget", "\347\241\256\345\256\232", nullptr));
         cancelButton->setText(QCoreApplication::translate("AccessAnalysisWidget", "\345\217\226\346\266\210", nullptr));
-        unitLabel->setText(QCoreApplication::translate("AccessAnalysisWidget", "\345\215\225\344\275\215\357\274\232\347\261\263", nullptr));
+        unitLabel->setText(QCoreApplication::translate("AccessAnalysisWidget", "\345\215\225\344\275\215\357\274\232\345\210\206\351\222\237", nullptr));
         saveFieldLabel->setText(QCoreApplication::translate("AccessAnalysisWidget", "\347\273\223\346\236\234\345\202\250\345\255\230\345\255\227\346\256\265", nullptr));
     } // retranslateUi
 

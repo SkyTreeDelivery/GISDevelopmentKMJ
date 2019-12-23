@@ -107,3 +107,22 @@ double GeoPolyline::disToPoint(GeoPoint *pt)
 	return mindis;
 }
 
+GeoPoint * GeoPolyline::getMeanCenter()
+{
+	double meanX, meanY;
+	double sumX = 0, sumY = 0;
+	int n = this->size();
+	for (int i = 0; i < n; i++)
+	{
+		sumX = sumX + pts.at(i)->getXf();
+		sumY = sumY + pts.at(i)->getYf();
+	}
+	meanX = sumX / n;
+	meanY = sumY / n;
+	GeoPoint *pt = new GeoPoint();
+	pt->setXf(meanX);
+	pt->setYf(meanY);
+	return pt;
+}
+
+

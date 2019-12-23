@@ -37,6 +37,8 @@ public:
 	static QList<GeoFeature*> search(GeoLayer * layer, QString attriName, QString attriValue);
 	static GeoFeature * identify(GeoPoint * point, GeoLayer * layer, float threshold,Index* spatialIndex);
 	static QList<GeoFeature*> globalSearch(GeoMap * map, QString attriValue);
+	static GeoLayer * util::grid2FeatureLayer(float ** gridData, QRectF mbr, int widthNum, int heightNum,
+		float cellSize, QString fullPath, QString name, QString cellValueAttriName);
 };
 
 #endif // UTIL_H

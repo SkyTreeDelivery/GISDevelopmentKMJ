@@ -3,7 +3,7 @@
 
 COption::COption()
 {
-	this->type = EnumType::KERNEL_DENSITY_ANALYSIS;
+	type = EnumType::KERNEL_DENSITY_ANALYSIS;
 }
 
 COption::~COption()
